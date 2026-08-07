@@ -1,0 +1,107 @@
+name: Sync Main Tracker to Access Copy
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sync-main-from-tracker
+  cancel-in-progress: true
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out access repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: access
+          fetch-depth: 0
+
+      - name: Check out main tracker
+        run: git clone --branch main --depth 1 https://github.com/saltandsovereigntypod/fantasy-book-tracker.git source
+
+      - name: Mirror main tracker into access repo
+        run: |
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude '.github/workflows/' \
+            source/ access/
+
+      - name: Restore fallback GitHub Pages base path
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('access/vite.config.ts')
+          text = path.read_text()
+          updated, count = re.subn(
+              r"base\s*:\s*['\"][^'\"]*['\"]",
+              "base: '/fantasy-book-tracker-access/'",
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('Could not safely update the Vite base path. Sync stopped before commit.')
+          path.write_text(updated)
+          PY
+
+      - name: Commit synced changes
+        id: commit
+        working-directory: access
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Access repo is already up to date.'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Sync main from fantasy-book-tracker"
+          git push origin main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: access/package-lock.json
+
+      - name: Install dependencies
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: access
+        run: npm ci
+
+      - name: Build access app
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: access
+        run: npm run build
+
+      - name: Configure Pages
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: access/dist
+
+      - name: Deploy to GitHub Pages
+        if: steps.commit.outputs.changed == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
