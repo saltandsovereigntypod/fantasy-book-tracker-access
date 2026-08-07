@@ -6,6 +6,24 @@ function ensureStyle() {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
+.v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 91%, var(--v2-accent, var(--accent)) 9%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 96%, var(--v2-accent, var(--accent)) 4%)
+  ) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 82%, var(--v2-accent, var(--accent)) 18%) !important;
+}
+
+.v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 92%, var(--path-paper, var(--paper)) 8%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 97%, var(--path-paper, var(--paper)) 3%)
+  ) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 86%, var(--path-paper, var(--paper)) 14%) !important;
+}
+
 @media (min-width: 761px) {
   .v2-view--library .v2-library-grid.is-flow-grouped {
     position: relative !important;
@@ -75,14 +93,38 @@ function firstArticleAfter(marker: HTMLElement): HTMLElement | null {
   return null;
 }
 
+function articlesAfter(marker: HTMLElement): HTMLElement[] {
+  const articles: HTMLElement[] = [];
+  let sibling = marker.nextElementSibling;
+  while (sibling) {
+    if (sibling instanceof HTMLElement && sibling.matches('.library-group-marker')) break;
+    if (sibling instanceof HTMLElement && sibling.matches('article')) articles.push(sibling);
+    sibling = sibling.nextElementSibling;
+  }
+  return articles;
+}
+
 function layoutGrid(grid: HTMLElement) {
   const markers = [...grid.querySelectorAll<HTMLElement>(':scope > .library-group-marker')];
   const desktop = window.matchMedia(DESKTOP_QUERY).matches;
-  grid.querySelectorAll<HTMLElement>(':scope > article.is-flow-group-start, :scope > article.is-flow-first-group').forEach((article) => {
-    article.classList.remove('is-flow-group-start', 'is-flow-first-group');
+  const articles = [...grid.querySelectorAll<HTMLElement>(':scope > article')];
+
+  articles.forEach((article) => {
+    article.classList.remove('is-flow-group-start', 'is-flow-first-group', 'is-flow-group-tone-a', 'is-flow-group-tone-b');
   });
 
-  if (!desktop || markers.length === 0) {
+  if (markers.length === 0) {
+    grid.classList.remove('is-flow-grouped', 'is-grouped-tinted');
+    return;
+  }
+
+  grid.classList.add('is-grouped-tinted');
+  markers.forEach((marker, index) => {
+    const toneClass = index % 2 === 0 ? 'is-flow-group-tone-a' : 'is-flow-group-tone-b';
+    articlesAfter(marker).forEach((article) => article.classList.add(toneClass));
+  });
+
+  if (!desktop) {
     grid.classList.remove('is-flow-grouped');
     markers.forEach(clearMarkerPosition);
     return;
