@@ -36,6 +36,23 @@ function ensureStyle() {
   .v2-view--library .v2-library-grid.is-flow-grouped > .library-group-marker em {
     flex: 0 0 auto;
   }
+
+  .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group) {
+    position: relative;
+  }
+
+  .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group)::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    inset-block: 10%;
+    inset-inline-start: -12px;
+    inline-size: 1px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 28%, transparent);
+    opacity: .72;
+  }
 }
 `;
   document.head.appendChild(style);
@@ -60,6 +77,9 @@ function firstArticleAfter(marker: HTMLElement): HTMLElement | null {
 function layoutGrid(grid: HTMLElement) {
   const markers = [...grid.querySelectorAll<HTMLElement>(':scope > .library-group-marker')];
   const desktop = window.matchMedia(DESKTOP_QUERY).matches;
+  grid.querySelectorAll<HTMLElement>(':scope > article.is-flow-group-start, :scope > article.is-flow-first-group').forEach((article) => {
+    article.classList.remove('is-flow-group-start', 'is-flow-first-group');
+  });
 
   if (!desktop || markers.length === 0) {
     grid.classList.remove('is-flow-grouped');
@@ -69,12 +89,15 @@ function layoutGrid(grid: HTMLElement) {
 
   grid.classList.add('is-flow-grouped');
 
-  markers.forEach((marker) => {
+  markers.forEach((marker, index) => {
     const firstArticle = firstArticleAfter(marker);
     if (!firstArticle) {
       clearMarkerPosition(marker);
       return;
     }
+
+    firstArticle.classList.add('is-flow-group-start');
+    if (index === 0) firstArticle.classList.add('is-flow-first-group');
 
     const left = firstArticle.offsetLeft;
     const top = Math.max(2, firstArticle.offsetTop - 24);
