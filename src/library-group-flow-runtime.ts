@@ -9,21 +9,25 @@ function ensureStyle() {
 .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 76%, var(--v2-accent, var(--accent)) 24%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 88%, var(--v2-accent, var(--accent)) 12%)
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 58%, var(--v2-accent, var(--accent)) 42%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 76%, var(--v2-accent, var(--accent)) 24%)
   ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 62%, var(--v2-accent, var(--accent)) 38%) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--v2-accent, var(--accent)) 10%, transparent);
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 38%, var(--v2-accent, var(--accent)) 62%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--v2-accent, var(--accent)) 22%, transparent),
+    inset 0 10px 26px color-mix(in srgb, var(--v2-accent, var(--accent)) 10%, transparent);
 }
 
 .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 80%, var(--path-paper, var(--paper)) 20%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 91%, var(--path-paper, var(--paper)) 9%)
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 64%, var(--path-paper, var(--paper)) 36%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 82%, var(--path-paper, var(--paper)) 18%)
   ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 68%, var(--path-paper, var(--paper)) 32%) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--path-paper, var(--paper)) 8%, transparent);
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 44%, var(--path-paper, var(--paper)) 56%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--path-paper, var(--paper)) 18%, transparent),
+    inset 0 10px 26px color-mix(in srgb, var(--path-paper, var(--paper)) 8%, transparent);
 }
 
 @media (min-width: 761px) {
