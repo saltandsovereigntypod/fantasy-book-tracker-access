@@ -24,6 +24,7 @@ import './recent-colors-runtime';
 import './library-preferences-runtime';
 import './library-metadata-runtime';
 import './library-group-flow-runtime';
+import './library-drag-autoscroll-runtime';
 import './extra-small-library-runtime';
 import './wall-dossier-resize-fix';
 import './editor-connections-runtime';
