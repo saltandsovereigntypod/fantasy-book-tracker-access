@@ -9,19 +9,21 @@ function ensureStyle() {
 .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 91%, var(--v2-accent, var(--accent)) 9%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 96%, var(--v2-accent, var(--accent)) 4%)
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 76%, var(--v2-accent, var(--accent)) 24%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 88%, var(--v2-accent, var(--accent)) 12%)
   ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 82%, var(--v2-accent, var(--accent)) 18%) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 62%, var(--v2-accent, var(--accent)) 38%) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--v2-accent, var(--accent)) 10%, transparent);
 }
 
 .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 92%, var(--path-paper, var(--paper)) 8%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 97%, var(--path-paper, var(--paper)) 3%)
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 80%, var(--path-paper, var(--paper)) 20%),
+    color-mix(in srgb, var(--v2-panel, var(--panel)) 91%, var(--path-paper, var(--paper)) 9%)
   ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 86%, var(--path-paper, var(--paper)) 14%) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 68%, var(--path-paper, var(--paper)) 32%) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--path-paper, var(--paper)) 8%, transparent);
 }
 
 @media (min-width: 761px) {
