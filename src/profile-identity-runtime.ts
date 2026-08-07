@@ -176,7 +176,7 @@ function renderIdentity(): void {
   if (universe === 'prythian') {
     grid.appendChild(makeCard('Fae identity', faeRoleName(prythianRole), `${court.charAt(0).toUpperCase()}${court.slice(1)} Court`));
   } else if (path === 'rider') {
-    grid.appendChild(makeCard('Rider assignment', `${ordinal(identity.rider.squad)} Squad`, `${identity.rider.section} Section`, `${ordinal(identity.rider.wing)} Wing`));
+    grid.appendChild(makeCard('Rider assignment', `${ordinal(identity.rider.squad)} Squad`, `${identity.rider.section} Section, ${ordinal(identity.rider.wing)} Wing`));
     if (identity.rider.dragon) {
       const dragon = identity.rider.dragon;
       grid.appendChild(makeCard('Bonded dragon', dragon.name, `${dragon.color}${dragon.tail ? ` · ${dragon.tail}` : ''}`));
