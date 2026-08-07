@@ -8,12 +8,14 @@ type RiderArchive = V2ArchiveState;
 const EVENT_NAME = 'Threshing';
 const BONDED_THRESHOLD = 20000;
 
+function riderPoints(archive: RiderArchive): number {
+  return Number(archive.universes?.empyrean?.points ?? archive.profile.points) || 0;
+}
+
 function isEligible(archive: RiderArchive): boolean {
-  const universe = archive.universes?.activeUniverse;
   const path = archive.universes?.empyrean?.path || archive.profile.path;
-  const points = Number(archive.universes?.empyrean?.points ?? archive.profile.points) || 0;
   const completed = archive.universes?.empyrean?.completedEvents || [];
-  return universe === 'empyrean' && path === 'rider' && points >= BONDED_THRESHOLD && !completed.includes(EVENT_NAME);
+  return path === 'rider' && riderPoints(archive) >= BONDED_THRESHOLD && !completed.includes(EVENT_NAME);
 }
 
 function currentDragon(archive: RiderArchive) {
@@ -89,8 +91,7 @@ function buildEvent(host: HTMLElement, archive: RiderArchive): HTMLElement {
   body.textContent = 'You have earned the right to enter the valley. Complete Threshing to record the dragon who chooses you.';
 
   const meta = document.createElement('small');
-  const points = Number(archive.universes?.empyrean?.points ?? archive.profile.points) || 0;
-  meta.textContent = `${points.toLocaleString()} Command points · Rider progression event`;
+  meta.textContent = `${riderPoints(archive).toLocaleString()} Command points · Rider progression event`;
 
   const actions = document.createElement('div');
   actions.className = 'rider-threshing-actions';
@@ -110,7 +111,9 @@ function buildEvent(host: HTMLElement, archive: RiderArchive): HTMLElement {
   return panel;
 }
 
-function syncEvent(): void {
+let syncToken = 0;
+async function syncEvent(): Promise<void> {
+  const token = ++syncToken;
   const existing = document.querySelector<HTMLElement>('[data-rider-threshing-event]');
   const root = document.querySelector<HTMLElement>('.core-path-app');
   const dashboard = document.querySelector<HTMLElement>('.v2-view--dashboard');
@@ -120,13 +123,23 @@ function syncEvent(): void {
     return;
   }
 
-  const archive = loadLocalArchive() as RiderArchive;
+  let archive = loadLocalArchive() as RiderArchive;
+  try {
+    const { user } = await getAuthSnapshot();
+    if (user) archive = await loadCloudArchive(user) as RiderArchive;
+  } catch {
+    // Local archive remains the fallback if cloud state cannot be read.
+  }
+
+  if (token !== syncToken) return;
+
   if (!isEligible(archive)) {
     existing?.remove();
     return;
   }
 
-  if (!existing) buildEvent(dashboard, archive);
+  const current = document.querySelector<HTMLElement>('[data-rider-threshing-event]');
+  if (!current && document.contains(dashboard)) buildEvent(dashboard, archive);
 }
 
 let frame = 0;
@@ -134,7 +147,7 @@ function scheduleSync(): void {
   if (frame) cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => {
     frame = 0;
-    syncEvent();
+    void syncEvent();
   });
 }
 
@@ -143,6 +156,7 @@ function start(): void {
   const observer = new MutationObserver(scheduleSync);
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-path', 'data-universe'] });
   window.addEventListener('storage', scheduleSync);
+  window.addEventListener('focus', scheduleSync);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
