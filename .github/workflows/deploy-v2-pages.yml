@@ -1,9 +1,9 @@
-name: Deploy V2 to GitHub Pages
+name: Deploy Access Copy to GitHub Pages
 
 on:
   push:
     branches:
-      - v2
+      - main
   workflow_dispatch:
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build V2 app
+      - name: Build access app
         run: npm run build
 
       - name: Configure Pages
