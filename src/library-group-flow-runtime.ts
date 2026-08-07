@@ -46,12 +46,13 @@ function ensureStyle() {
     position: absolute;
     z-index: 2;
     pointer-events: none;
-    inset-block: 10%;
-    inset-inline-start: -12px;
-    inline-size: 1px;
+    inset-block: 5%;
+    inset-inline-start: -13px;
+    inline-size: 2px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 28%, transparent);
-    opacity: .72;
+    background: color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 52%, transparent);
+    box-shadow: 0 0 7px color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 18%, transparent);
+    opacity: .94;
   }
 }
 `;
