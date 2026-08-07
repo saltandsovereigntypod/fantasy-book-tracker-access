@@ -7,17 +7,16 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
+  actions: write
 
 concurrency:
   group: sync-main-from-tracker
   cancel-in-progress: true
 
 jobs:
-  sync-and-deploy:
+  sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Check out access repo
@@ -73,35 +72,9 @@ jobs:
           git push origin main
           echo 'changed=true' >> "$GITHUB_OUTPUT"
 
-      - name: Set up Node
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: access/package-lock.json
-
-      - name: Install dependencies
+      - name: Trigger Pages build
         if: steps.commit.outputs.changed == 'true'
         working-directory: access
-        run: npm ci
-
-      - name: Build access app
-        if: steps.commit.outputs.changed == 'true'
-        working-directory: access
-        run: npm run build
-
-      - name: Configure Pages
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: access/dist
-
-      - name: Deploy to GitHub Pages
-        if: steps.commit.outputs.changed == 'true'
-        id: deployment
-        uses: actions/deploy-pages@v4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-v2-pages.yml --ref main
