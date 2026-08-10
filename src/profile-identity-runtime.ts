@@ -169,8 +169,11 @@ function renderIdentity(): void {
   const prythianRole = archive.universes.prythian.role;
   const empyreanPoints = Number(archive.universes.empyrean.points ?? archive.profile.points) || 0;
   const prythianPoints = Number(archive.universes.prythian.points ?? archive.profile.points) || 0;
+  const empyreanEvents = archive.universes.empyrean.completedEvents || [];
+  const threshingComplete = empyreanEvents.includes('Threshing');
+  const harvestComplete = empyreanEvents.includes('The Harvest');
   const prythian = archive.universes.prythian;
-  const signature = JSON.stringify({ universe, path, court, identity, prythianRole, empyreanPoints, prythianPoints, primaryPowerId: prythian.primaryPowerId, rareAffinityId: prythian.rareAffinityId });
+  const signature = JSON.stringify({ universe, path, court, identity, prythianRole, empyreanPoints, prythianPoints, empyreanEvents, primaryPowerId: prythian.primaryPowerId, rareAffinityId: prythian.rareAffinityId });
   if (section.dataset.signature === signature) return;
   section.dataset.signature = signature;
 
@@ -190,7 +193,7 @@ function renderIdentity(): void {
     }
   } else if (path === 'rider') {
     grid.appendChild(makeCard('Rider assignment', `${ordinal(identity.rider.squad)} Squad`, `${identity.rider.section} Section, ${ordinal(identity.rider.wing)} Wing`));
-    if (identity.rider.dragon) {
+    if (threshingComplete && identity.rider.dragon) {
       const dragon = identity.rider.dragon;
       grid.appendChild(makeCard('Bonded dragon', dragon.name, `${dragon.color}${dragon.tail ? ` · ${dragon.tail}` : ''}`));
     }
@@ -199,7 +202,7 @@ function renderIdentity(): void {
     }
   } else if (path === 'gryphon') {
     grid.appendChild(makeCard('Drift assignment', identity.gryphon.drift));
-    if (identity.gryphon.gryphon) {
+    if (harvestComplete && identity.gryphon.gryphon) {
       grid.appendChild(makeCard('Bonded gryphon', identity.gryphon.gryphon.name, identity.gryphon.gryphon.color));
     }
     if (empyreanPoints >= PATHS.gryphon.thresholds[2] && identity.gryphon.gift) {
