@@ -1,3 +1,5 @@
+import './ash-harvest-recovery-runtime';
+
 const STYLE_ID = 'harvest-ui-authority-style';
 
 function installStyle(): void {
