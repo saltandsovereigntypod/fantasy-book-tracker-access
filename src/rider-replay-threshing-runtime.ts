@@ -1,9 +1,11 @@
 import { loadCloudArchive, loadLocalArchive, saveCloudArchive, saveLocalArchive, type V2ArchiveState } from './archive';
+import { PATHS } from './paths';
 import { getAuthSnapshot } from './supabase';
 import './rider-replay-threshing-runtime.css';
 
 const EVENT_NAME = 'Threshing';
 const VIEW_KEY = 'empyrean-v2-current-view';
+const REPLAY_THRESHOLD = PATHS.rider.thresholds[PATHS.rider.bondedRank ?? 1];
 
 function isThreshingStory(story: V2ArchiveState['universes']['empyrean']['stories'][number]): boolean {
   const title = String(story?.title || '').toLocaleLowerCase();
@@ -55,9 +57,9 @@ function render(): void {
   }
 
   const archive = loadLocalArchive();
-  const completed = archive.universes.empyrean.completedEvents || [];
   const dragon = archive.profile.identityAssignments?.rider?.dragon;
-  if (!completed.includes(EVENT_NAME) || !dragon?.name) {
+  const points = Number(archive.universes.empyrean.points ?? archive.profile.points) || 0;
+  if (!dragon?.name || points < REPLAY_THRESHOLD) {
     existing?.remove();
     return;
   }
@@ -97,6 +99,7 @@ function start(): void {
   const observer = new MutationObserver(schedule);
   observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-path', 'data-universe'] });
   window.addEventListener('storage', schedule);
+  window.addEventListener('focus', schedule);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
