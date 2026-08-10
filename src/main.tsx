@@ -33,6 +33,8 @@ import './point-ledger-runtime';
 import './profile-identity-runtime';
 import './sidebar-quotes-runtime';
 import './rider-threshing-runtime';
+import './prythian-progression-runtime';
+import './empyrean-rank-gate-runtime';
 import './extra-small-library.css';
 import './library-card-sizing-fix.css';
 import './core-theme-system.css';

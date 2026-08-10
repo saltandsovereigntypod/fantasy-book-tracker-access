@@ -1,5 +1,7 @@
 import { loadLocalArchive, saveCloudArchive, saveLocalArchive } from './archive';
+import { PATHS } from './paths';
 import { getAuthSnapshot } from './supabase';
+import { PRYTHIAN_THRESHOLDS, RARE_PRYTHIAN_AFFINITIES } from './universes';
 
 function faeRoleName(role: 'high-fae' | 'lesser-fae' | 'illyrian' | undefined): string {
   if (role === 'illyrian') return 'Illyrian';
@@ -165,7 +167,10 @@ function renderIdentity(): void {
   const path = root?.dataset.path || archive.universes.empyrean.path || archive.profile.path;
   const court = root?.dataset.court || archive.universes.prythian.court || 'night';
   const prythianRole = archive.universes.prythian.role;
-  const signature = JSON.stringify({ universe, path, court, identity, prythianRole });
+  const empyreanPoints = Number(archive.universes.empyrean.points ?? archive.profile.points) || 0;
+  const prythianPoints = Number(archive.universes.prythian.points ?? archive.profile.points) || 0;
+  const prythian = archive.universes.prythian;
+  const signature = JSON.stringify({ universe, path, court, identity, prythianRole, empyreanPoints, prythianPoints, primaryPowerId: prythian.primaryPowerId, rareAffinityId: prythian.rareAffinityId });
   if (section.dataset.signature === signature) return;
   section.dataset.signature = signature;
 
@@ -174,14 +179,22 @@ function renderIdentity(): void {
   grid.className = 'core-identity-reveal-grid';
 
   if (universe === 'prythian') {
-    grid.appendChild(makeCard('Fae identity', faeRoleName(prythianRole), `${court.charAt(0).toUpperCase()}${court.slice(1)} Court`));
+    grid.appendChild(makeCard('Fae lineage', faeRoleName(prythianRole), `${court.charAt(0).toUpperCase()}${court.slice(1)} Court`));
+    if (prythianPoints >= PRYTHIAN_THRESHOLDS[1] && prythian.primaryPowerName) {
+      grid.appendChild(makeCard('Court power', prythian.primaryPowerName, 'Unlocked as Sworn Courtier', prythian.primaryPowerDescription));
+    }
+    if (prythianPoints >= PRYTHIAN_THRESHOLDS[2] && prythian.rareAffinityName) {
+      const definition = RARE_PRYTHIAN_AFFINITIES.find((affinity) => affinity.id === prythian.rareAffinityId);
+      const description = prythian.rareAffinityId === 'none' ? 'No rare affinity manifested.' : definition?.description;
+      grid.appendChild(makeCard('Rare affinity', prythian.rareAffinityName, 'Unlocked as Court Emissary', description));
+    }
   } else if (path === 'rider') {
     grid.appendChild(makeCard('Rider assignment', `${ordinal(identity.rider.squad)} Squad`, `${identity.rider.section} Section, ${ordinal(identity.rider.wing)} Wing`));
     if (identity.rider.dragon) {
       const dragon = identity.rider.dragon;
       grid.appendChild(makeCard('Bonded dragon', dragon.name, `${dragon.color}${dragon.tail ? ` · ${dragon.tail}` : ''}`));
     }
-    if (identity.rider.signet) {
+    if (empyreanPoints >= PATHS.rider.thresholds[2] && identity.rider.signet) {
       grid.appendChild(makeCard('Signet', identity.rider.signet.name, identity.rider.signet.category, identity.rider.signet.description));
     }
   } else if (path === 'gryphon') {
@@ -189,7 +202,7 @@ function renderIdentity(): void {
     if (identity.gryphon.gryphon) {
       grid.appendChild(makeCard('Bonded gryphon', identity.gryphon.gryphon.name, identity.gryphon.gryphon.color));
     }
-    if (identity.gryphon.gift) {
+    if (empyreanPoints >= PATHS.gryphon.thresholds[2] && identity.gryphon.gift) {
       grid.appendChild(makeCard('Mindwork gift', identity.gryphon.gift.name, identity.gryphon.gift.category, identity.gryphon.gift.description));
     }
   } else if (path === 'dark') {
