@@ -1,22 +1,25 @@
-function isFlierDashboard(): boolean {
-  const root = document.querySelector<HTMLElement>('.core-path-app');
-  return Boolean(
-    root
-    && root.dataset.universe === 'empyrean'
-    && root.dataset.path === 'gryphon'
-    && document.querySelector('.v2-view--dashboard'),
-  );
+const STYLE_ID = 'harvest-ui-authority-style';
+
+function installStyle(): void {
+  if (document.getElementById(STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = `
+    .core-path-app[data-universe="empyrean"][data-path="gryphon"]
+      .rider-threshing-event[data-empyrean-bonding-event="gryphon-legacy"] {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(style);
 }
 
-function removeLegacyHarvestPanels(): void {
-  if (!isFlierDashboard()) return;
+function relabelLegacyHarvest(): void {
+  const root = document.querySelector<HTMLElement>('.core-path-app');
+  if (!root || root.dataset.universe !== 'empyrean' || root.dataset.path !== 'gryphon') return;
 
-  document.querySelectorAll<HTMLElement>('.rider-threshing-event').forEach((panel) => {
-    const text = panel.textContent || '';
-    const isLegacyHarvest = text.includes('Three-part story event')
-      || text.includes('Your choices through the bonding field and first flight determine whether you return as a bonded flier.');
-
-    if (isLegacyHarvest) panel.remove();
+  document.querySelectorAll<HTMLElement>('.rider-threshing-event[data-empyrean-bonding-event="gryphon"]').forEach((panel) => {
+    if (panel.dataset.harvestRuntime === 'true') return;
+    panel.dataset.empyreanBondingEvent = 'gryphon-legacy';
   });
 }
 
@@ -25,7 +28,8 @@ function schedule(): void {
   if (frame) cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => {
     frame = 0;
-    removeLegacyHarvestPanels();
+    installStyle();
+    relabelLegacyHarvest();
   });
 }
 
@@ -36,7 +40,7 @@ function start(): void {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['class', 'data-path', 'data-universe'],
+    attributeFilter: ['data-empyrean-bonding-event', 'data-path', 'data-universe'],
   });
   window.addEventListener('storage', schedule);
   window.addEventListener('focus', schedule);
