@@ -1,12 +1,13 @@
 import { createCreatureAssignment } from './assignments';
 import { loadCloudArchive, loadLocalArchive, saveCloudArchive, saveLocalArchive, type V2ArchiveState } from './archive';
+import { PATHS } from './paths';
 import { getAuthSnapshot } from './supabase';
 import './rider-threshing-runtime.css';
 
 type RiderArchive = V2ArchiveState;
 
 const EVENT_NAME = 'Threshing';
-const BONDED_THRESHOLD = 20000;
+const THRESHING_UNLOCK_THRESHOLD = PATHS.rider.thresholds[1];
 
 function riderPoints(archive: RiderArchive): number {
   return Number(archive.universes?.empyrean?.points ?? archive.profile.points) || 0;
@@ -21,7 +22,7 @@ function isEligible(archive: RiderArchive): boolean {
   const completed = archive.universes?.empyrean?.completedEvents || [];
   const threshingRecorded = completed.includes(EVENT_NAME);
   const hasBondedDragon = Boolean(currentDragon(archive)?.name);
-  return path === 'rider' && riderPoints(archive) >= BONDED_THRESHOLD && (!threshingRecorded || !hasBondedDragon);
+  return path === 'rider' && riderPoints(archive) >= THRESHING_UNLOCK_THRESHOLD && (!threshingRecorded || !hasBondedDragon);
 }
 
 async function completeThreshing(status: HTMLElement, button: HTMLButtonElement): Promise<void> {
