@@ -51,6 +51,7 @@ import './library-card-layout-authority.css';
 import './interaction-layer-authority.css';
 import './point-ledger-runtime.css';
 import './profile-identity-runtime.css';
+import './path-profile-separation.css';
 import './library-quick-add-runtime.css';
 import './global-scrollbars.css';
 import './mobile-card-editor-authority.css';
