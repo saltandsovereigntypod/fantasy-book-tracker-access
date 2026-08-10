@@ -12,14 +12,16 @@ function riderPoints(archive: RiderArchive): number {
   return Number(archive.universes?.empyrean?.points ?? archive.profile.points) || 0;
 }
 
+function currentDragon(archive: RiderArchive) {
+  return archive.profile.identityAssignments?.rider?.dragon;
+}
+
 function isEligible(archive: RiderArchive): boolean {
   const path = archive.universes?.empyrean?.path || archive.profile.path;
   const completed = archive.universes?.empyrean?.completedEvents || [];
-  return path === 'rider' && riderPoints(archive) >= BONDED_THRESHOLD && !completed.includes(EVENT_NAME);
-}
-
-function currentDragon(archive: RiderArchive) {
-  return archive.profile.identityAssignments?.rider?.dragon;
+  const threshingRecorded = completed.includes(EVENT_NAME);
+  const hasBondedDragon = Boolean(currentDragon(archive)?.name);
+  return path === 'rider' && riderPoints(archive) >= BONDED_THRESHOLD && (!threshingRecorded || !hasBondedDragon);
 }
 
 async function completeThreshing(status: HTMLElement, button: HTMLButtonElement): Promise<void> {
