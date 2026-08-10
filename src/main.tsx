@@ -34,6 +34,7 @@ import './profile-identity-runtime';
 import './sidebar-quotes-runtime';
 import './rider-threshing-runtime';
 import './harvest-runtime';
+import './harvest-ui-authority-runtime';
 import './rider-replay-threshing-runtime';
 import './prythian-progression-runtime';
 import './empyrean-rank-gate-runtime';
