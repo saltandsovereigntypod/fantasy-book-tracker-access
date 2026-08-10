@@ -79,7 +79,8 @@ function pointsFor(archive: Archive): number {
 }
 
 function completed(archive: Archive): boolean {
-  return (archive.universes.empyrean.completedEvents || []).includes(EVENT_NAME);
+  const eventRecorded = (archive.universes.empyrean.completedEvents || []).includes(EVENT_NAME);
+  return eventRecorded && Boolean(existingGryphon(archive)?.name);
 }
 
 function existingGryphon(archive: Archive): CreatureAssignment | undefined {
