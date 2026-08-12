@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import './archive-egress-guard';
 import CoreFullApp from './CoreFullApp';
 import { bootstrapUniverse } from './bootstrap-universe';
 import './creative-libraries.css';

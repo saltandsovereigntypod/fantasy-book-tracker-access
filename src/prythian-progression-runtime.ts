@@ -1,5 +1,5 @@
 import { stableNumber } from './assignments';
-import { loadCloudArchive, loadLocalArchive, saveCloudArchive, saveLocalArchive, type V2ArchiveState } from './archive';
+import { loadLocalArchive, saveCloudArchive, saveLocalArchive, type V2ArchiveState } from './archive';
 import { getAuthSnapshot } from './supabase';
 import { PRYTHIAN_COURTS, PRYTHIAN_THRESHOLDS, RARE_PRYTHIAN_AFFINITIES } from './universes';
 
@@ -40,11 +40,9 @@ async function syncUnlocks(): Promise<void> {
   if (syncing) return;
   syncing = true;
   try {
-    const local = loadLocalArchive();
-    if (!local.universes?.prythian?.onboarded || !local.universes.prythian.court) return;
+    const archive = loadLocalArchive();
+    if (!archive.universes?.prythian?.onboarded || !archive.universes.prythian.court) return;
 
-    const { user } = await getAuthSnapshot();
-    const archive = user ? await loadCloudArchive(user) : local;
     const points = pointsFor(archive);
     let next = archive;
     let changed = false;
@@ -101,10 +99,11 @@ async function syncUnlocks(): Promise<void> {
 
     if (!changed) return;
     saveLocalArchive(next);
+    const { user } = await getAuthSnapshot();
     if (user) await saveCloudArchive(user, next);
     window.dispatchEvent(new StorageEvent('storage', { key: 'empyrean-v2-archive' }));
   } catch {
-    // Unlocks will retry the next time the archive becomes active or the window regains focus.
+    // Unlocks retry when local archive state changes or the window regains focus.
   } finally {
     syncing = false;
   }
