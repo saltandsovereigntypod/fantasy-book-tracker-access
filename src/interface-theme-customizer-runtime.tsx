@@ -4,6 +4,8 @@ import { PATHS, pathFor } from './paths';
 import { PRYTHIAN_COURTS, type PrythianCourtId } from './universes';
 import { getAuthSnapshot, supabase } from './supabase';
 
+type LibraryBackingMode = 'theme' | 'custom';
+
 type ThemeSettings = {
   pageBackground: string;
   navigation: string;
@@ -16,6 +18,13 @@ type ThemeSettings = {
   navigationOpacity: number;
   contentOpacity: number;
   blur: number;
+  libraryBackingVisible: boolean;
+  libraryBackingMode: LibraryBackingMode;
+  libraryBackingColor: string;
+  libraryBackingOpacity: number;
+  libraryBackingBlur: number;
+  libraryBackingBorderStrength: number;
+  libraryBackingBorderColor: string;
 };
 
 type ThemeRecord = {
@@ -45,6 +54,11 @@ const STYLE_VARS = [
   '--interface-nav-opacity',
   '--interface-content-opacity',
   '--interface-blur',
+  '--library-backing-color',
+  '--library-backing-opacity',
+  '--library-backing-blur',
+  '--library-backing-border-strength',
+  '--library-backing-border-color',
 ] as const;
 
 function clamp(value: unknown, min: number, max: number, fallback: number): number {
@@ -71,6 +85,13 @@ function defaultsFromPalette(palette: {
     navigationOpacity: 44,
     contentOpacity: 36,
     blur: 18,
+    libraryBackingVisible: true,
+    libraryBackingMode: 'theme',
+    libraryBackingColor: palette.panel,
+    libraryBackingOpacity: 72,
+    libraryBackingBlur: 12,
+    libraryBackingBorderStrength: 68,
+    libraryBackingBorderColor: palette.border,
   };
 }
 
@@ -102,6 +123,13 @@ function normalizeSettings(value: unknown, defaults: ThemeSettings): ThemeSettin
     navigationOpacity: clamp(source.navigationOpacity, 10, 100, defaults.navigationOpacity),
     contentOpacity: clamp(source.contentOpacity, 10, 100, defaults.contentOpacity),
     blur: clamp(source.blur, 0, 32, defaults.blur),
+    libraryBackingVisible: source.libraryBackingVisible !== false,
+    libraryBackingMode: source.libraryBackingMode === 'custom' ? 'custom' : 'theme',
+    libraryBackingColor: validColor(source.libraryBackingColor, defaults.libraryBackingColor),
+    libraryBackingOpacity: clamp(source.libraryBackingOpacity, 0, 100, defaults.libraryBackingOpacity),
+    libraryBackingBlur: clamp(source.libraryBackingBlur, 0, 24, defaults.libraryBackingBlur),
+    libraryBackingBorderStrength: clamp(source.libraryBackingBorderStrength, 0, 100, defaults.libraryBackingBorderStrength),
+    libraryBackingBorderColor: validColor(source.libraryBackingBorderColor, defaults.libraryBackingBorderColor),
   };
 }
 
@@ -161,6 +189,8 @@ function clearAppliedTheme(): void {
   STYLE_VARS.forEach((name) => document.documentElement.style.removeProperty(name));
   delete document.documentElement.dataset.interfaceThemeCustom;
   delete document.body.dataset.interfaceThemeCustom;
+  delete document.documentElement.dataset.libraryBackingCustom;
+  delete document.documentElement.dataset.libraryBackingVisible;
 }
 
 function applyTheme(record: ThemeRecord | undefined): void {
@@ -181,8 +211,16 @@ function applyTheme(record: ThemeRecord | undefined): void {
   style.setProperty('--interface-nav-opacity', `${settings.navigationOpacity}%`);
   style.setProperty('--interface-content-opacity', `${settings.contentOpacity}%`);
   style.setProperty('--interface-blur', `${settings.blur}px`);
+  style.setProperty('--library-backing-color', settings.libraryBackingColor);
+  style.setProperty('--library-backing-opacity', `${settings.libraryBackingOpacity}%`);
+  style.setProperty('--library-backing-blur', `${settings.libraryBackingBlur}px`);
+  style.setProperty('--library-backing-border-strength', `${settings.libraryBackingBorderStrength}%`);
+  style.setProperty('--library-backing-border-color', settings.libraryBackingBorderColor);
   document.documentElement.dataset.interfaceThemeCustom = 'true';
   document.body.dataset.interfaceThemeCustom = 'true';
+  document.documentElement.dataset.libraryBackingVisible = settings.libraryBackingVisible ? 'true' : 'false';
+  if (settings.libraryBackingMode === 'custom') document.documentElement.dataset.libraryBackingCustom = 'true';
+  else delete document.documentElement.dataset.libraryBackingCustom;
 }
 
 async function loadCloudLibrary(userId: string): Promise<ThemeLibrary> {
@@ -218,12 +256,12 @@ async function saveCloudLibrary(userId: string, library: ThemeLibrary): Promise<
   if (error) throw error;
 }
 
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="interface-theme-color-field"><span>{label}</span><div><input type="color" value={value} onChange={(event) => onChange(event.target.value)} /><code>{value.toUpperCase()}</code></div></label>;
+function ColorField({ label, value, disabled = false, onChange }: { label: string; value: string; disabled?: boolean; onChange: (value: string) => void }) {
+  return <label className={`interface-theme-color-field${disabled ? ' is-disabled' : ''}`}><span>{label}</span><div><input type="color" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} /><code>{value.toUpperCase()}</code></div></label>;
 }
 
-function RangeField({ label, value, min, max, suffix, onChange }: { label: string; value: number; min: number; max: number; suffix: string; onChange: (value: number) => void }) {
-  return <label className="interface-theme-range-field"><span>{label}<strong>{value}{suffix}</strong></span><input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+function RangeField({ label, value, min, max, suffix, disabled = false, onChange }: { label: string; value: number; min: number; max: number; suffix: string; disabled?: boolean; onChange: (value: number) => void }) {
+  return <label className={`interface-theme-range-field${disabled ? ' is-disabled' : ''}`}><span>{label}<strong>{value}{suffix}</strong></span><input type="range" min={min} max={max} value={value} disabled={disabled} onChange={(event) => onChange(Number(event.target.value))} /></label>;
 }
 
 function InterfaceThemeCustomizer() {
@@ -326,12 +364,13 @@ function InterfaceThemeCustomizer() {
   }
 
   if (!identity || !draft) return null;
+  const customBackingDisabled = !draft.libraryBackingVisible || draft.libraryBackingMode !== 'custom';
 
   return <>
     <button className="interface-theme-launcher" type="button" onClick={() => { setOpen(true); setStatus(''); }}>Interface Theme</button>
     {open && <div className="interface-theme-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setOpen(false); }}>
       <section className="interface-theme-dialog" role="dialog" aria-modal="true" aria-label="Customize interface theme">
-        <header><div><p>Personal interface</p><h2>Customize {identity.label}</h2><span>Changes affect the app around your books. Book cards and Card Themes are never modified.</span></div><button type="button" disabled={saving} onClick={() => setOpen(false)}>×</button></header>
+        <header><div><p>Personal interface</p><h2>Customize {identity.label}</h2><span>Changes affect the app around your books. Book cards, filters, sorting, grouping, and Card Themes are never modified.</span></div><button type="button" disabled={saving} onClick={() => setOpen(false)}>×</button></header>
         <div className="interface-theme-grid">
           <section><h3>Colors</h3><div className="interface-theme-colors">
             <ColorField label="Page background" value={draft.pageBackground} onChange={(value) => update('pageBackground', value)} />
@@ -348,6 +387,18 @@ function InterfaceThemeCustomizer() {
             <RangeField label="Content opacity" value={draft.contentOpacity} min={10} max={100} suffix="%" onChange={(value) => update('contentOpacity', value)} />
             <RangeField label="Blur strength" value={draft.blur} min={0} max={32} suffix="px" onChange={(value) => update('blur', value)} />
             <div className="interface-theme-preview"><span>Live preview</span><strong>{identity.label}</strong><p>The background remains visible through theme-colored glass.</p></div>
+          </section>
+          <section className="interface-theme-library-backing"><h3>Library card backing</h3><p className="interface-theme-section-note">These controls only style the visual wrapper behind each Library card.</p>
+            <label className="interface-theme-switch"><span><strong>Show library backing</strong><small>Hide the colored wrapper without changing the book card.</small></span><input type="checkbox" checked={draft.libraryBackingVisible} onChange={(event) => update('libraryBackingVisible', event.target.checked)} /></label>
+            <label className="interface-theme-select-field"><span>Backing style</span><select value={draft.libraryBackingMode} onChange={(event) => update('libraryBackingMode', event.target.value as LibraryBackingMode)}><option value="theme">Use theme default</option><option value="custom">Custom</option></select></label>
+            <div className={`interface-theme-backing-custom${customBackingDisabled ? ' is-disabled' : ''}`}>
+              <ColorField label="Backing color" value={draft.libraryBackingColor} disabled={customBackingDisabled} onChange={(value) => update('libraryBackingColor', value)} />
+              <RangeField label="Backing opacity" value={draft.libraryBackingOpacity} min={0} max={100} suffix="%" disabled={customBackingDisabled} onChange={(value) => update('libraryBackingOpacity', value)} />
+              <RangeField label="Backing blur" value={draft.libraryBackingBlur} min={0} max={24} suffix="px" disabled={customBackingDisabled} onChange={(value) => update('libraryBackingBlur', value)} />
+              <RangeField label="Border strength" value={draft.libraryBackingBorderStrength} min={0} max={100} suffix="%" disabled={customBackingDisabled} onChange={(value) => update('libraryBackingBorderStrength', value)} />
+              <ColorField label="Border color" value={draft.libraryBackingBorderColor} disabled={customBackingDisabled} onChange={(value) => update('libraryBackingBorderColor', value)} />
+            </div>
+            <small className="interface-theme-backing-mode-note">{!draft.libraryBackingVisible ? 'Backing is hidden. Your custom values are preserved.' : draft.libraryBackingMode === 'theme' ? 'The active path or court theme controls the backing. Custom values stay saved for later.' : 'Custom backing is active. Library organization and card designs stay unchanged.'}</small>
           </section>
         </div>
         <footer><div>{status || (customized ? 'This theme has your personal interface colors.' : 'Using the built-in interface colors.')}</div><div><button type="button" disabled={saving} onClick={() => void reset()}>Reset to Theme Defaults</button><button className="is-primary" type="button" disabled={saving} onClick={() => void save()}>{saving ? 'Saving…' : 'Save Interface Theme'}</button></div></footer>

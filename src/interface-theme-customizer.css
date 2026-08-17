@@ -84,6 +84,21 @@ html[data-interface-theme-custom="true"] .core-path-app .v2-view label{
   color:var(--interface-muted)!important;
 }
 
+/* Library backing customization only targets the wrapper around rendered cards.
+   It does not alter CardRenderer, filter/sort/group controls, or saved CardDesign data. */
+html[data-interface-theme-custom="true"][data-library-backing-visible="false"] .core-path-app .v2-library-grid>article{
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+html[data-interface-theme-custom="true"][data-library-backing-custom="true"][data-library-backing-visible="true"] .core-path-app .v2-library-grid>article{
+  background:color-mix(in srgb,var(--library-backing-color) var(--library-backing-opacity),transparent)!important;
+  border-color:color-mix(in srgb,var(--library-backing-border-color) var(--library-backing-border-strength),transparent)!important;
+  backdrop-filter:blur(var(--library-backing-blur)) saturate(1.08)!important;
+}
+
 /* Book cards intentionally excluded. Their CardRenderer/design styling stays authoritative. */
 .interface-theme-launcher{
   position:fixed;
@@ -151,10 +166,21 @@ html[data-interface-theme-custom="true"] .core-path-app .v2-view label{
 .interface-theme-range-field>span{display:flex;justify-content:space-between;gap:10px}
 .interface-theme-range-field strong{color:var(--v2-text,#f4f1ff)}
 .interface-theme-range-field input{width:100%;accent-color:var(--v2-accent,#8c78c9)}
+.interface-theme-color-field.is-disabled,.interface-theme-range-field.is-disabled,.interface-theme-backing-custom.is-disabled{opacity:.5}
+.interface-theme-color-field input:disabled,.interface-theme-range-field input:disabled{cursor:not-allowed}
 .interface-theme-preview{margin-top:24px;padding:18px;border:1px solid color-mix(in srgb,var(--v2-accent,#8c78c9) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--v2-panel,#101225) 42%,transparent);backdrop-filter:blur(18px)}
 .interface-theme-preview span{display:block;color:var(--v2-accent,#8c78c9);font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:800}
 .interface-theme-preview strong{display:block;margin:4px 0 7px;font-size:1.2rem}
 .interface-theme-preview p{margin:0;color:var(--v2-muted,#aaa8c9);line-height:1.45}
+.interface-theme-library-backing{grid-column:1/-1}
+.interface-theme-section-note{margin:-8px 0 16px;color:var(--v2-muted,#aaa8c9);font-size:.8rem;line-height:1.45}
+.interface-theme-switch{display:flex!important;align-items:center;justify-content:space-between;gap:18px;padding:12px 0;border-bottom:1px solid var(--v2-border,#30365a);color:var(--v2-text,#f4f1ff)!important}
+.interface-theme-switch>span{display:grid;gap:3px}.interface-theme-switch small{color:var(--v2-muted,#aaa8c9)!important;font-weight:500}.interface-theme-switch input{width:20px;height:20px;accent-color:var(--v2-accent,#8c78c9)}
+.interface-theme-select-field{display:grid;grid-template-columns:minmax(140px,.35fr) minmax(0,1fr);align-items:center;gap:14px;padding:14px 0;color:var(--v2-muted,#aaa8c9)!important;font-size:.8rem;font-weight:750}
+.interface-theme-select-field select{min-height:42px;padding:0 10px;border:1px solid var(--v2-border,#30365a);border-radius:10px;background:var(--v2-panel,#101225);color:var(--v2-text,#f4f1ff)}
+.interface-theme-backing-custom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;padding-top:4px;transition:opacity .16s ease}
+.interface-theme-backing-custom .interface-theme-range-field{margin-bottom:8px}
+.interface-theme-backing-mode-note{display:block;margin-top:10px;color:var(--v2-muted,#aaa8c9);line-height:1.45}
 .interface-theme-dialog>footer{align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--v2-border,#30365a)}
 .interface-theme-dialog>footer>div:first-child{color:var(--v2-muted,#aaa8c9);font-size:.82rem}
 .interface-theme-dialog>footer>div:last-child{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
@@ -164,7 +190,9 @@ html[data-interface-theme-custom="true"] .core-path-app .v2-view label{
   .interface-theme-backdrop{padding:8px}
   .interface-theme-dialog{padding:14px}
   .interface-theme-grid{grid-template-columns:1fr}
-  .interface-theme-colors{grid-template-columns:1fr}
+  .interface-theme-colors,.interface-theme-backing-custom{grid-template-columns:1fr}
+  .interface-theme-library-backing{grid-column:auto}
+  .interface-theme-select-field{grid-template-columns:1fr;gap:7px}
   .interface-theme-dialog>footer{align-items:stretch;flex-direction:column}
   .interface-theme-dialog>footer>div:last-child{justify-content:stretch}
   .interface-theme-dialog>footer button{flex:1}
