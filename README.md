@@ -61,4 +61,3 @@ list or sign URLs for those records.
 Rollback: revert the application commit first. Then, only after exporting any user
 uploads, drop the two owner policies/tables and remove the two private buckets.
 Do not delete storage objects before confirming that no saved card references them.
-
