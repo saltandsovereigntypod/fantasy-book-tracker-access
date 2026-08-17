@@ -1,0 +1,79 @@
+/* Final authority for saved personal interface themes.
+   These selectors intentionally outrank Rider/court-specific !important surfaces. */
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-app-sidebar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-topbar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app[data-path] .v2-app-sidebar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app[data-path] .v2-topbar,
+html[data-interface-theme-custom="true"][data-universe][data-court] .core-path-app .v2-app-sidebar,
+html[data-interface-theme-custom="true"][data-universe][data-court] .core-path-app .v2-topbar {
+  background:color-mix(in srgb,var(--interface-navigation) var(--interface-nav-opacity),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 72%,transparent)!important;
+  color:var(--interface-text)!important;
+  backdrop-filter:blur(var(--interface-blur)) saturate(1.12)!important;
+}
+
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-view>section,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-view>div>section,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-hero,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-metric-grid article,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-dashboard-panel,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-library-actionbar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-library-controls,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-library-controls>* ,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-profile>section,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .core-profile>section,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .core-profile-assignment,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .core-assignment-compact,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .prythian-universe-panel,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .prythian-progression-panel,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .investigation-panel,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .investigation-form,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .investigation-card,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .wall-shell,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .wall-compact-toolbar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .wall-filter-drawer,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-toolbar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-filters,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-selection-bar,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-node,
+html[data-interface-theme-custom="true"][data-universe][data-court] .core-path-app .v2-view>section,
+html[data-interface-theme-custom="true"][data-universe][data-court] .core-path-app .v2-view>div>section {
+  background:color-mix(in srgb,var(--interface-panel) var(--interface-content-opacity),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 68%,transparent)!important;
+  color:var(--interface-text)!important;
+  backdrop-filter:blur(var(--interface-blur)) saturate(1.12)!important;
+}
+
+html[data-interface-theme-custom="true"][data-universe] .core-path-app input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+html[data-interface-theme-custom="true"][data-universe] .core-path-app select,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app textarea,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .wall-popover,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .wall-source-results,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-inspector,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .mind-map-inspector>header {
+  background:color-mix(in srgb,var(--interface-panel-alt) calc(var(--interface-content-opacity) + 8%),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 72%,transparent)!important;
+  color:var(--interface-text)!important;
+}
+
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-app-sidebar nav button.is-active,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app button.is-active:not(.is-danger),
+html[data-interface-theme-custom="true"][data-universe] .core-path-app button[type="submit"] {
+  background:color-mix(in srgb,var(--interface-accent) 82%,transparent)!important;
+  border-color:var(--interface-accent)!important;
+  color:var(--interface-text)!important;
+}
+
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-topbar p,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-brand small,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-sidebar-footer small,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-hero p {
+  color:var(--interface-accent)!important;
+}
+
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-view p,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-view small,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-view label,
+html[data-interface-theme-custom="true"][data-universe] .core-path-app .v2-app-sidebar nav button {
+  color:var(--interface-muted)!important;
+}

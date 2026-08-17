@@ -22,6 +22,7 @@ import './mind-map-line-rules-position';
 import './mind-map-relationship-polish.css';
 import './card-theme-library-runtime';
 import './interface-theme-customizer-runtime';
+import './interface-background-customizer-runtime';
 import './library-quick-add-runtime';
 import './recent-colors-runtime';
 import './library-preferences-runtime';
@@ -61,6 +62,8 @@ import './library-quick-add-runtime.css';
 import './global-scrollbars.css';
 import './theme-glass-authority.css';
 import './interface-theme-customizer.css';
+import './interface-theme-final-authority.css';
+import './interface-background-authority.css';
 import './mobile-card-editor-authority.css';
 import './mobile-overflow-authority.css';
 

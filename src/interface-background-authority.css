@@ -1,0 +1,46 @@
+html[data-interface-background-custom="true"] body{
+  background:
+    linear-gradient(180deg,color-mix(in srgb,var(--interface-page-bg,var(--v2-bg)) 24%,transparent),color-mix(in srgb,var(--interface-page-bg,var(--v2-bg)) 42%,transparent)),
+    var(--interface-background-image) center center/cover fixed no-repeat,
+    var(--interface-page-bg,var(--v2-bg))!important;
+}
+
+html[data-interface-background-custom="true"] .core-path-app,
+html[data-interface-background-custom="true"][data-universe] .core-path-app[data-path],
+html[data-interface-background-custom="true"][data-universe][data-court] .core-path-app{
+  background:transparent!important;
+}
+
+html[data-interface-background-custom="true"] .core-path-app::before,
+html[data-interface-background-custom="true"] .core-path-app::after,
+html[data-interface-background-custom="true"][data-universe] .core-path-app[data-path]::before,
+html[data-interface-background-custom="true"][data-universe] .core-path-app[data-path]::after,
+html[data-interface-background-custom="true"][data-universe][data-court] .core-path-app::before,
+html[data-interface-background-custom="true"][data-universe][data-court] .core-path-app::after{
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+  background:none!important;
+}
+
+.interface-background-field{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--v2-border,#30365a);
+}
+.interface-background-field h3{margin:0 0 12px}
+.interface-background-field label{display:grid;gap:7px;color:var(--v2-muted,#aaa8c9);font-size:.78rem;font-weight:750}
+.interface-background-field input{
+  width:100%;
+  min-height:42px;
+  padding:0 11px;
+  border:1px solid var(--v2-border,#30365a);
+  border-radius:10px;
+  color:var(--v2-text,#f4f1ff);
+  background:var(--v2-panel,#101225);
+}
+.interface-background-field small{display:block;margin-top:8px;color:var(--v2-muted,#aaa8c9);line-height:1.45}
+
+@media(max-width:760px){
+  html[data-interface-background-custom="true"] body{background-attachment:scroll}
+}
