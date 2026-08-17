@@ -1,6 +1,6 @@
 html[data-universe="prythian"][data-court="night"] body{
   background:
-    linear-gradient(180deg,rgba(5,6,17,.58),rgba(5,6,17,.84)),
+    linear-gradient(180deg,rgba(5,6,17,.24),rgba(5,6,17,.48)),
     var(--night-court-background-image) center top/cover fixed no-repeat,
     #050611 !important;
 }
@@ -29,18 +29,18 @@ html[data-universe="prythian"][data-court="night"] .v2-app-sidebar,
 html[data-universe="prythian"][data-court="night"] .prythian-universe-panel,
 html[data-universe="prythian"][data-court="night"] .prythian-progression-panel,
 html[data-universe="prythian"][data-court="night"] .v2-view>section{
-  background:rgba(12,14,34,.82)!important;
+  background:rgba(12,14,34,.72)!important;
   border-color:rgba(126,121,196,.42)!important;
   box-shadow:0 18px 55px rgba(0,0,0,.28);
-  backdrop-filter:blur(14px) saturate(1.08);
+  backdrop-filter:blur(10px) saturate(1.05);
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-app-sidebar{
-  background:linear-gradient(180deg,rgba(8,9,22,.88),rgba(7,8,18,.82))!important;
+  background:linear-gradient(180deg,rgba(8,9,22,.78),rgba(7,8,18,.72))!important;
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-topbar{
-  background:rgba(8,9,22,.78)!important;
+  background:rgba(8,9,22,.68)!important;
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-app-sidebar nav button.is-active,

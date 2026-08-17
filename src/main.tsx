@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './archive-egress-guard';
 import CoreFullApp from './CoreFullApp';
 import { bootstrapUniverse } from './bootstrap-universe';
+import './last-visible-theme-runtime';
 import './creative-libraries.css';
 import './stage-controls.css';
 import './editor-shell.css';
