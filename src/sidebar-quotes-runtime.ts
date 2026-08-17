@@ -2,27 +2,68 @@ import { loadCloudArchive, loadLocalArchive, saveCloudArchive, saveLocalArchive,
 import { getAuthSnapshot } from './supabase';
 import './sidebar-quotes-runtime.css';
 
-type QuoteProfile = V2ArchiveState['profile'] & { sidebarQuotes?: string[] };
+type UniverseId = 'empyrean' | 'prythian';
+type QuoteProfile = V2ArchiveState['profile'] & {
+  sidebarQuotes?: string[];
+  sidebarQuotesByUniverse?: Partial<Record<UniverseId, string[]>>;
+};
 
-const DEFAULT_QUOTES = [
-  '“I am the sky and the power of every storm that has ever been. I am infinite.”',
-  '“There’s nowhere in existence you could go that I wouldn’t find you, Violence.”',
-];
+const DEFAULT_QUOTES: Record<UniverseId, string[]> = {
+  empyrean: [
+    '“I am the sky and the power of every storm that has ever been. I am infinite.”',
+    '“There’s nowhere in existence you could go that I wouldn’t find you, Violence.”',
+  ],
+  prythian: [
+    '“To the stars who listen and the dreams that are answered.”',
+    '“I am the rock against which the surf crashes. Nothing can break me.”',
+  ],
+};
 
-function currentQuotes(): string[] {
-  const archive = loadLocalArchive();
-  const saved = (archive.profile as QuoteProfile).sidebarQuotes;
-  if (!Array.isArray(saved)) return DEFAULT_QUOTES;
-  return [String(saved[0] ?? ''), String(saved[1] ?? '')];
+function activeUniverse(): UniverseId {
+  const root = document.querySelector<HTMLElement>('.core-path-app');
+  return root?.dataset.universe === 'prythian' ? 'prythian' : 'empyrean';
 }
 
-async function saveQuotes(quotes: string[], status: HTMLElement): Promise<void> {
-  const local = loadLocalArchive();
-  const localNext: V2ArchiveState = {
-    ...local,
-    profile: { ...local.profile, sidebarQuotes: quotes } as QuoteProfile,
+function quotePair(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return [String(value[0] ?? ''), String(value[1] ?? '')];
+}
+
+function currentQuotes(universe = activeUniverse()): string[] {
+  const archive = loadLocalArchive();
+  const profile = archive.profile as QuoteProfile;
+  const savedForUniverse = quotePair(profile.sidebarQuotesByUniverse?.[universe]);
+  if (savedForUniverse) return savedForUniverse;
+
+  // Preserve any quotes already edited from the original Rider-only editor as the
+  // Empyrean set. Prythian starts from the established Night Court pair.
+  if (universe === 'empyrean') {
+    const legacy = quotePair(profile.sidebarQuotes);
+    if (legacy) return legacy;
+  }
+
+  return [...DEFAULT_QUOTES[universe]];
+}
+
+function withUniverseQuotes(state: V2ArchiveState, universe: UniverseId, quotes: string[]): V2ArchiveState {
+  const profile = state.profile as QuoteProfile;
+  const nextByUniverse = {
+    ...(profile.sidebarQuotesByUniverse || {}),
+    [universe]: quotes,
+  };
+  return {
+    ...state,
+    profile: {
+      ...profile,
+      sidebarQuotesByUniverse: nextByUniverse,
+      ...(universe === 'empyrean' ? { sidebarQuotes: quotes } : {}),
+    } as QuoteProfile,
     updatedAt: new Date().toISOString(),
   };
+}
+
+async function saveQuotes(universe: UniverseId, quotes: string[], status: HTMLElement): Promise<void> {
+  const localNext = withUniverseQuotes(loadLocalArchive(), universe, quotes);
   saveLocalArchive(localNext);
   status.textContent = 'Saving…';
 
@@ -30,11 +71,7 @@ async function saveQuotes(quotes: string[], status: HTMLElement): Promise<void> 
     const { user } = await getAuthSnapshot();
     if (!user) throw new Error('No signed-in user');
     const latest = await loadCloudArchive(user);
-    const next: V2ArchiveState = {
-      ...latest,
-      profile: { ...latest.profile, sidebarQuotes: quotes } as QuoteProfile,
-      updatedAt: new Date().toISOString(),
-    };
+    const next = withUniverseQuotes(latest, universe, quotes);
     await saveCloudArchive(user, next);
     saveLocalArchive(next);
     status.textContent = 'Saved';
@@ -44,10 +81,11 @@ async function saveQuotes(quotes: string[], status: HTMLElement): Promise<void> 
   }
 }
 
-function buildPanel(footer: HTMLElement): HTMLElement {
+function buildPanel(footer: HTMLElement, universe: UniverseId): HTMLElement {
   const panel = document.createElement('section');
   panel.className = 'v2-sidebar-custom-quotes';
   panel.dataset.sidebarCustomQuotes = 'true';
+  panel.dataset.quoteUniverse = universe;
 
   const display = document.createElement('div');
   display.className = 'v2-sidebar-custom-quotes-display';
@@ -59,7 +97,7 @@ function buildPanel(footer: HTMLElement): HTMLElement {
   edit.type = 'button';
   edit.className = 'v2-sidebar-custom-quotes-edit';
   edit.textContent = 'Edit';
-  edit.setAttribute('aria-label', 'Edit sidebar quotes');
+  edit.setAttribute('aria-label', `Edit ${universe === 'prythian' ? 'Prythian' : 'Empyrean'} sidebar quotes`);
 
   const status = document.createElement('small');
   status.className = 'v2-sidebar-custom-quotes-status';
@@ -68,7 +106,7 @@ function buildPanel(footer: HTMLElement): HTMLElement {
 
   const renderDisplay = () => {
     display.replaceChildren();
-    currentQuotes().forEach((quote) => {
+    currentQuotes(universe).forEach((quote) => {
       if (!quote.trim()) return;
       const p = document.createElement('p');
       p.textContent = quote;
@@ -85,7 +123,7 @@ function buildPanel(footer: HTMLElement): HTMLElement {
   edit.addEventListener('click', () => {
     if (panel.classList.contains('is-editing')) return;
     panel.classList.add('is-editing');
-    const values = currentQuotes();
+    const values = currentQuotes(universe);
     const form = document.createElement('div');
     form.className = 'v2-sidebar-custom-quotes-form';
 
@@ -116,7 +154,7 @@ function buildPanel(footer: HTMLElement): HTMLElement {
     });
     save.addEventListener('click', async () => {
       save.disabled = true;
-      await saveQuotes([first.value.trim(), second.value.trim()], status);
+      await saveQuotes(universe, [first.value.trim(), second.value.trim()], status);
       panel.classList.remove('is-editing');
       renderDisplay();
     });
@@ -131,13 +169,19 @@ function syncPanel(): void {
   const root = document.querySelector<HTMLElement>('.core-path-app');
   const footer = document.querySelector<HTMLElement>('.v2-app-sidebar .v2-sidebar-footer');
   const existing = document.querySelector<HTMLElement>('[data-sidebar-custom-quotes]');
-  const shouldShow = root?.dataset.universe === 'empyrean' && root?.dataset.path === 'rider';
+  const universe: UniverseId | undefined = root?.dataset.universe === 'prythian'
+    ? 'prythian'
+    : root?.dataset.universe === 'empyrean'
+      ? 'empyrean'
+      : undefined;
 
-  if (!footer || !shouldShow) {
+  if (!footer || !universe) {
     existing?.remove();
     return;
   }
-  if (!existing) buildPanel(footer);
+
+  if (existing?.dataset.quoteUniverse !== universe) existing.remove();
+  if (!document.querySelector('[data-sidebar-custom-quotes]')) buildPanel(footer, universe);
 }
 
 let frame = 0;
@@ -152,7 +196,7 @@ function scheduleSync(): void {
 function start(): void {
   scheduleSync();
   const observer = new MutationObserver(scheduleSync);
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-path', 'data-universe'] });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-path', 'data-universe', 'data-court'] });
   window.addEventListener('storage', scheduleSync);
 }
 

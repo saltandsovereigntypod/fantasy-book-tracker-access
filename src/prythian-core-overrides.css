@@ -100,19 +100,3 @@ html[data-universe='prythian'] .mind-map-minimap svg {
 }
 
 html[data-universe='prythian'] .mind-map-minimap circle { fill: var(--v2-accent) !important; stroke: var(--v2-text) !important; }
-
-html[data-universe='prythian'][data-court='night'] .v2-sidebar-footer::before {
-  content: '“To the stars who listen and the dreams that are answered.”\A\A“I am the rock against which the surf crashes. Nothing can break me.”';
-  display: block;
-  margin-bottom: 22px;
-  padding: 16px;
-  border: 1px solid var(--v2-border);
-  border-radius: 14px;
-  color: var(--v2-text);
-  background: color-mix(in srgb, var(--v2-panel-raised) 88%, transparent);
-  font-family: 'Libre Baskerville', Georgia, serif;
-  font-size: 0.78rem;
-  font-style: italic;
-  line-height: 1.55;
-  white-space: pre-line;
-}
