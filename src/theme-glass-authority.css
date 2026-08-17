@@ -1,0 +1,48 @@
+/* Shared glass treatment for every universe/path/court.
+   Theme palettes remain authoritative; this only changes surface opacity. */
+.core-path-app .v2-app-sidebar,
+.core-path-app .v2-topbar{
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 78%,transparent)!important;
+  border-color:var(--v2-border,var(--border))!important;
+  backdrop-filter:blur(14px) saturate(1.08);
+}
+
+.core-path-app .v2-hero,
+.core-path-app .v2-metric-grid article,
+.core-path-app .v2-dashboard-panel,
+.core-path-app .v2-library-actionbar,
+.core-path-app .v2-library-controls,
+.core-path-app .v2-library-grid>article,
+.core-path-app .v2-profile>section,
+.core-path-app .core-profile>section,
+.core-path-app .core-profile-assignment,
+.core-path-app .core-assignment-compact,
+.core-path-app .prythian-universe-panel,
+.core-path-app .prythian-progression-panel,
+.core-path-app .investigation-form,
+.core-path-app .investigation-card,
+.core-path-app .wall-compact-toolbar,
+.core-path-app .wall-filter-drawer,
+.core-path-app .mind-map-toolbar,
+.core-path-app .mind-map-filters,
+.core-path-app .mind-map-selection-bar,
+.core-path-app .mind-map-node{
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 74%,transparent)!important;
+  border-color:var(--v2-border,var(--border))!important;
+  backdrop-filter:blur(14px) saturate(1.08);
+}
+
+.core-path-app .v2-mini-books article,
+.core-path-app .wall-popover,
+.core-path-app .wall-source-results,
+.core-path-app .mind-map-inspector,
+.core-path-app .mind-map-inspector>header{
+  background:color-mix(in srgb,var(--v2-panel-raised,var(--panel-2)) 80%,transparent)!important;
+  backdrop-filter:blur(12px) saturate(1.06);
+}
+
+/* Preserve transparent page layers so each theme's atmosphere/background remains visible. */
+.core-path-app .v2-app-main,
+.core-path-app .v2-view{
+  background:transparent!important;
+}
