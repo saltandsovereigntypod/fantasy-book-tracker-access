@@ -180,7 +180,7 @@ function syncPanel(): void {
     return;
   }
 
-  if (existing?.dataset.quoteUniverse !== universe) existing.remove();
+  if (existing && existing.dataset.quoteUniverse !== universe) existing.remove();
   if (!document.querySelector('[data-sidebar-custom-quotes]')) buildPanel(footer, universe);
 }
 
