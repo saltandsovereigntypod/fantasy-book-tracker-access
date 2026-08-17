@@ -1,17 +1,17 @@
 html[data-universe="prythian"][data-court="night"] body{
-  background:#050611;
+  background:
+    linear-gradient(180deg,rgba(5,6,17,.58),rgba(5,6,17,.84)),
+    var(--night-court-background-image) center top/cover fixed no-repeat,
+    #050611 !important;
 }
 
 html[data-universe="prythian"][data-court="night"] .core-path-app{
-  background:
-    linear-gradient(180deg,rgba(5,6,17,.66),rgba(5,6,17,.9)),
-    url('./assets/themes/night-court/night-court-background.png') center top/cover fixed no-repeat,
-    #050611;
+  background:transparent !important;
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-app-main,
 html[data-universe="prythian"][data-court="night"] .v2-view{
-  background:transparent;
+  background:transparent !important;
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-topbar,
@@ -26,7 +26,11 @@ html[data-universe="prythian"][data-court="night"] .v2-view>section{
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-app-sidebar{
-  background:linear-gradient(180deg,rgba(8,9,22,.95),rgba(7,8,18,.9))!important;
+  background:linear-gradient(180deg,rgba(8,9,22,.88),rgba(7,8,18,.82))!important;
+}
+
+html[data-universe="prythian"][data-court="night"] .v2-topbar{
+  background:rgba(8,9,22,.78)!important;
 }
 
 html[data-universe="prythian"][data-court="night"] .v2-app-sidebar nav button.is-active,
@@ -86,7 +90,7 @@ html[data-universe="prythian"][data-court="night"] .prythian-progression-panel p
 }
 
 @media(max-width:900px){
-  html[data-universe="prythian"][data-court="night"] .core-path-app{
+  html[data-universe="prythian"][data-court="night"] body{
     background-attachment:scroll;
     background-position:58% top;
   }
