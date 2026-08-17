@@ -1,0 +1,17 @@
+.interface-theme-field-help{
+  display:block;
+  margin-top:-2px;
+  color:var(--v2-muted,#aaa8c9);
+  font-size:.68rem;
+  font-weight:500;
+  line-height:1.35;
+  opacity:.86;
+}
+
+.interface-theme-color-field .interface-theme-field-help{
+  min-height:2.7em;
+}
+
+.interface-theme-range-field .interface-theme-field-help{
+  margin-bottom:2px;
+}
