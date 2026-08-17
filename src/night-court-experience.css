@@ -9,6 +9,16 @@ html[data-universe="prythian"][data-court="night"] .core-path-app{
   background:transparent !important;
 }
 
+/* Night Court uses its supplied artwork as the atmosphere. Disable the generic
+   animated starfield and haze layers that otherwise sit over the image. */
+html[data-universe="prythian"][data-court="night"] .core-path-app::before,
+html[data-universe="prythian"][data-court="night"] .core-path-app::after{
+  content:none !important;
+  display:none !important;
+  animation:none !important;
+  background:none !important;
+}
+
 html[data-universe="prythian"][data-court="night"] .v2-app-main,
 html[data-universe="prythian"][data-court="night"] .v2-view{
   background:transparent !important;
