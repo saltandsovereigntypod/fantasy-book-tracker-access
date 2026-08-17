@@ -1,48 +1,50 @@
 /* Shared glass treatment for every universe/path/court.
    Theme palettes remain authoritative; this only changes surface opacity. */
-.core-path-app .v2-app-sidebar,
-.core-path-app .v2-topbar{
-  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 52%,transparent)!important;
-  border-color:color-mix(in srgb,var(--v2-border,var(--border)) 72%,transparent)!important;
-  backdrop-filter:blur(18px) saturate(1.12);
-}
-
-.core-path-app .v2-hero,
-.core-path-app .v2-metric-grid article,
-.core-path-app .v2-dashboard-panel,
-.core-path-app .v2-library-actionbar,
-.core-path-app .v2-library-controls,
-.core-path-app .v2-library-grid>article,
-.core-path-app .v2-profile>section,
-.core-path-app .core-profile>section,
-.core-path-app .core-profile-assignment,
-.core-path-app .core-assignment-compact,
-.core-path-app .prythian-universe-panel,
-.core-path-app .prythian-progression-panel,
-.core-path-app .investigation-form,
-.core-path-app .investigation-card,
-.core-path-app .wall-compact-toolbar,
-.core-path-app .wall-filter-drawer,
-.core-path-app .mind-map-toolbar,
-.core-path-app .mind-map-filters,
-.core-path-app .mind-map-selection-bar,
-.core-path-app .mind-map-node{
-  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 46%,transparent)!important;
+html[data-universe] .core-path-app .v2-app-sidebar,
+html[data-universe] .core-path-app .v2-topbar{
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 44%,transparent)!important;
   border-color:color-mix(in srgb,var(--v2-border,var(--border)) 68%,transparent)!important;
-  backdrop-filter:blur(18px) saturate(1.12);
+  backdrop-filter:blur(20px) saturate(1.12);
 }
 
-.core-path-app .v2-mini-books article,
-.core-path-app .wall-popover,
-.core-path-app .wall-source-results,
-.core-path-app .mind-map-inspector,
-.core-path-app .mind-map-inspector>header{
-  background:color-mix(in srgb,var(--v2-panel-raised,var(--panel-2)) 54%,transparent)!important;
-  backdrop-filter:blur(16px) saturate(1.1);
+html[data-universe] .core-path-app .v2-view>section,
+html[data-universe] .core-path-app .v2-view>div>section,
+html[data-universe] .core-path-app .v2-hero,
+html[data-universe] .core-path-app .v2-metric-grid article,
+html[data-universe] .core-path-app .v2-dashboard-panel,
+html[data-universe] .core-path-app .v2-library-actionbar,
+html[data-universe] .core-path-app .v2-library-controls,
+html[data-universe] .core-path-app .v2-library-grid>article,
+html[data-universe] .core-path-app .v2-profile>section,
+html[data-universe] .core-path-app .core-profile>section,
+html[data-universe] .core-path-app .core-profile-assignment,
+html[data-universe] .core-path-app .core-assignment-compact,
+html[data-universe] .core-path-app .prythian-universe-panel,
+html[data-universe] .core-path-app .prythian-progression-panel,
+html[data-universe] .core-path-app .investigation-form,
+html[data-universe] .core-path-app .investigation-card,
+html[data-universe] .core-path-app .wall-compact-toolbar,
+html[data-universe] .core-path-app .wall-filter-drawer,
+html[data-universe] .core-path-app .mind-map-toolbar,
+html[data-universe] .core-path-app .mind-map-filters,
+html[data-universe] .core-path-app .mind-map-selection-bar,
+html[data-universe] .core-path-app .mind-map-node{
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 36%,transparent)!important;
+  border-color:color-mix(in srgb,var(--v2-border,var(--border)) 62%,transparent)!important;
+  backdrop-filter:blur(20px) saturate(1.12);
+}
+
+html[data-universe] .core-path-app .v2-mini-books article,
+html[data-universe] .core-path-app .wall-popover,
+html[data-universe] .core-path-app .wall-source-results,
+html[data-universe] .core-path-app .mind-map-inspector,
+html[data-universe] .core-path-app .mind-map-inspector>header{
+  background:color-mix(in srgb,var(--v2-panel-raised,var(--panel-2)) 42%,transparent)!important;
+  backdrop-filter:blur(18px) saturate(1.1);
 }
 
 /* Preserve transparent page layers so each theme's atmosphere/background remains visible. */
-.core-path-app .v2-app-main,
-.core-path-app .v2-view{
+html[data-universe] .core-path-app .v2-app-main,
+html[data-universe] .core-path-app .v2-view{
   background:transparent!important;
 }
