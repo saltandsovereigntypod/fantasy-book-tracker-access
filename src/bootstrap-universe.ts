@@ -1,28 +1,108 @@
 import { loadLocalArchive } from './archive';
+import nightCourtBackground from './assets/themes/night-court/night-court-background.png';
 
-/**
- * Apply the persisted universe identity before React mounts so the first painted
- * frame, global atmosphere selectors, and portal-based tools all agree on the
- * same universe. CoreFullApp remains the owner after mount.
- */
-export function bootstrapUniverse(): void {
-  const archive = loadLocalArchive();
-  const universe = archive.universes.activeUniverse;
-  const court = archive.universes.prythian.court || 'night';
-  const path = archive.universes.empyrean.path || archive.profile.path || 'rider';
+const LAST_THEME_KEY = 'fantasy-book-tracker-last-visible-theme';
 
-  document.documentElement.dataset.universe = universe;
-  document.body.dataset.universe = universe;
+type PersistedTheme = {
+  universe: 'empyrean' | 'prythian';
+  path?: string;
+  court?: string;
+};
 
-  if (universe === 'prythian') {
+function readPersistedTheme(): PersistedTheme | undefined {
+  try {
+    const raw = localStorage.getItem(LAST_THEME_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as Partial<PersistedTheme>;
+    if (parsed.universe !== 'empyrean' && parsed.universe !== 'prythian') return undefined;
+    return {
+      universe: parsed.universe,
+      path: parsed.path ? String(parsed.path) : undefined,
+      court: parsed.court ? String(parsed.court) : undefined,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function writePersistedTheme(theme: PersistedTheme): void {
+  try { localStorage.setItem(LAST_THEME_KEY, JSON.stringify(theme)); } catch {}
+}
+
+function applyThemeIdentity(theme: PersistedTheme): void {
+  document.documentElement.dataset.universe = theme.universe;
+  document.body.dataset.universe = theme.universe;
+
+  if (theme.universe === 'prythian') {
+    const court = theme.court || 'night';
     document.documentElement.dataset.court = court;
     document.body.dataset.court = court;
     delete document.documentElement.dataset.path;
     delete document.body.dataset.path;
   } else {
+    const path = theme.path || 'rider';
     document.documentElement.dataset.path = path;
     document.body.dataset.path = path;
     delete document.documentElement.dataset.court;
     delete document.body.dataset.court;
   }
+}
+
+function visibleThemeIdentity(): PersistedTheme | undefined {
+  const root = document.querySelector<HTMLElement>('.core-path-app');
+  const universe = root?.dataset.universe || document.documentElement.dataset.universe;
+  if (universe !== 'prythian' && universe !== 'empyrean') return undefined;
+
+  if (universe === 'prythian') {
+    return {
+      universe,
+      court: root?.dataset.court || document.documentElement.dataset.court || 'night',
+    };
+  }
+
+  return {
+    universe,
+    path: root?.dataset.path || document.documentElement.dataset.path || 'rider',
+  };
+}
+
+/**
+ * Apply the last theme the user actually saw before React mounts so the loading
+ * screen matches the active experience. The archive remains the fallback for
+ * first load; once the app renders, a lightweight observer remembers the visible
+ * universe/path/court for the next reload.
+ */
+export function bootstrapUniverse(): void {
+  document.documentElement.style.setProperty('--night-court-background-image', `url("${nightCourtBackground}")`);
+
+  const archive = loadLocalArchive();
+  const archiveTheme: PersistedTheme = archive.universes.activeUniverse === 'prythian'
+    ? { universe: 'prythian', court: archive.universes.prythian.court || 'night' }
+    : { universe: 'empyrean', path: archive.universes.empyrean.path || archive.profile.path || 'rider' };
+
+  const initialTheme = readPersistedTheme() || archiveTheme;
+  applyThemeIdentity(initialTheme);
+  writePersistedTheme(initialTheme);
+
+  let frame = 0;
+  const rememberVisibleTheme = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const current = visibleThemeIdentity();
+      if (current) writePersistedTheme(current);
+    });
+  };
+
+  const observer = new MutationObserver(rememberVisibleTheme);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['data-universe', 'data-path', 'data-court'],
+  });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-universe', 'data-path', 'data-court'],
+  });
 }
