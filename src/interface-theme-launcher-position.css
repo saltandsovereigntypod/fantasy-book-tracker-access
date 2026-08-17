@@ -1,0 +1,20 @@
+/* Interface Theme shares the Card Theme launcher slot when Card Theme is not present.
+   When both launchers exist, Interface Theme stacks directly above Card Theme. */
+.interface-theme-launcher {
+  bottom: 22px;
+}
+
+body:has(.card-theme-launcher) .interface-theme-launcher {
+  bottom: 76px;
+}
+
+@media (max-width: 760px) {
+  .interface-theme-launcher {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  body:has(.card-theme-launcher) .interface-theme-launcher {
+    bottom: 64px;
+  }
+}

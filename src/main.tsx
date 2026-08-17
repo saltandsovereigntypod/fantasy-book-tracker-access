@@ -66,6 +66,7 @@ import './interface-theme-customizer.css';
 import './interface-theme-final-authority.css';
 import './interface-background-authority.css';
 import './interface-theme-label-help.css';
+import './interface-theme-launcher-position.css';
 import './mobile-card-editor-authority.css';
 import './mobile-overflow-authority.css';
 
