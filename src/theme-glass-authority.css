@@ -2,9 +2,9 @@
    Theme palettes remain authoritative; this only changes surface opacity. */
 .core-path-app .v2-app-sidebar,
 .core-path-app .v2-topbar{
-  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 78%,transparent)!important;
-  border-color:var(--v2-border,var(--border))!important;
-  backdrop-filter:blur(14px) saturate(1.08);
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 52%,transparent)!important;
+  border-color:color-mix(in srgb,var(--v2-border,var(--border)) 72%,transparent)!important;
+  backdrop-filter:blur(18px) saturate(1.12);
 }
 
 .core-path-app .v2-hero,
@@ -27,9 +27,9 @@
 .core-path-app .mind-map-filters,
 .core-path-app .mind-map-selection-bar,
 .core-path-app .mind-map-node{
-  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 74%,transparent)!important;
-  border-color:var(--v2-border,var(--border))!important;
-  backdrop-filter:blur(14px) saturate(1.08);
+  background:color-mix(in srgb,var(--v2-panel,var(--panel)) 46%,transparent)!important;
+  border-color:color-mix(in srgb,var(--v2-border,var(--border)) 68%,transparent)!important;
+  backdrop-filter:blur(18px) saturate(1.12);
 }
 
 .core-path-app .v2-mini-books article,
@@ -37,8 +37,8 @@
 .core-path-app .wall-source-results,
 .core-path-app .mind-map-inspector,
 .core-path-app .mind-map-inspector>header{
-  background:color-mix(in srgb,var(--v2-panel-raised,var(--panel-2)) 80%,transparent)!important;
-  backdrop-filter:blur(12px) saturate(1.06);
+  background:color-mix(in srgb,var(--v2-panel-raised,var(--panel-2)) 54%,transparent)!important;
+  backdrop-filter:blur(16px) saturate(1.1);
 }
 
 /* Preserve transparent page layers so each theme's atmosphere/background remains visible. */
