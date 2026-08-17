@@ -1,0 +1,171 @@
+html[data-interface-theme-custom="true"] body{
+  background-color:var(--interface-page-bg)!important;
+  color:var(--interface-text)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-app-sidebar,
+html[data-interface-theme-custom="true"] .core-path-app .v2-topbar{
+  background:color-mix(in srgb,var(--interface-navigation) var(--interface-nav-opacity),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 72%,transparent)!important;
+  color:var(--interface-text)!important;
+  backdrop-filter:blur(var(--interface-blur)) saturate(1.12)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-view>section,
+html[data-interface-theme-custom="true"] .core-path-app .v2-view>div>section,
+html[data-interface-theme-custom="true"] .core-path-app .v2-hero,
+html[data-interface-theme-custom="true"] .core-path-app .v2-metric-grid article,
+html[data-interface-theme-custom="true"] .core-path-app .v2-dashboard-panel,
+html[data-interface-theme-custom="true"] .core-path-app .v2-library-actionbar,
+html[data-interface-theme-custom="true"] .core-path-app .v2-library-controls,
+html[data-interface-theme-custom="true"] .core-path-app .v2-library-grid>article,
+html[data-interface-theme-custom="true"] .core-path-app .v2-profile>section,
+html[data-interface-theme-custom="true"] .core-path-app .core-profile>section,
+html[data-interface-theme-custom="true"] .core-path-app .core-profile-assignment,
+html[data-interface-theme-custom="true"] .core-path-app .core-assignment-compact,
+html[data-interface-theme-custom="true"] .core-path-app .prythian-universe-panel,
+html[data-interface-theme-custom="true"] .core-path-app .prythian-progression-panel,
+html[data-interface-theme-custom="true"] .core-path-app .investigation-form,
+html[data-interface-theme-custom="true"] .core-path-app .investigation-card,
+html[data-interface-theme-custom="true"] .core-path-app .wall-compact-toolbar,
+html[data-interface-theme-custom="true"] .core-path-app .wall-filter-drawer,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-toolbar,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-filters,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-selection-bar,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-node{
+  background:color-mix(in srgb,var(--interface-panel) var(--interface-content-opacity),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 68%,transparent)!important;
+  color:var(--interface-text)!important;
+  backdrop-filter:blur(var(--interface-blur)) saturate(1.12)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-mini-books article,
+html[data-interface-theme-custom="true"] .core-path-app .wall-popover,
+html[data-interface-theme-custom="true"] .core-path-app .wall-source-results,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-inspector,
+html[data-interface-theme-custom="true"] .core-path-app .mind-map-inspector>header,
+html[data-interface-theme-custom="true"] .core-path-app .v2-library-controls input,
+html[data-interface-theme-custom="true"] .core-path-app .v2-library-controls select,
+html[data-interface-theme-custom="true"] .core-path-app input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+html[data-interface-theme-custom="true"] .core-path-app select,
+html[data-interface-theme-custom="true"] .core-path-app textarea{
+  background:color-mix(in srgb,var(--interface-panel-alt) calc(var(--interface-content-opacity) + 8%),transparent)!important;
+  border-color:color-mix(in srgb,var(--interface-border) 72%,transparent)!important;
+  color:var(--interface-text)!important;
+  backdrop-filter:blur(var(--interface-blur)) saturate(1.08)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-app-main,
+html[data-interface-theme-custom="true"] .core-path-app .v2-view{
+  background:transparent!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-topbar p,
+html[data-interface-theme-custom="true"] .core-path-app .v2-brand small,
+html[data-interface-theme-custom="true"] .core-path-app .v2-sidebar-footer small,
+html[data-interface-theme-custom="true"] .core-path-app .v2-dashboard-panel header button,
+html[data-interface-theme-custom="true"] .core-path-app .v2-hero p{
+  color:var(--interface-accent)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-app-sidebar nav button.is-active,
+html[data-interface-theme-custom="true"] .core-path-app button.is-active:not(.is-danger),
+html[data-interface-theme-custom="true"] .core-path-app button[type="submit"]{
+  border-color:var(--interface-accent)!important;
+  background:color-mix(in srgb,var(--interface-accent) 82%,transparent)!important;
+  color:var(--interface-text)!important;
+}
+
+html[data-interface-theme-custom="true"] .core-path-app .v2-app-sidebar nav button,
+html[data-interface-theme-custom="true"] .core-path-app .v2-sync-state,
+html[data-interface-theme-custom="true"] .core-path-app .v2-view p,
+html[data-interface-theme-custom="true"] .core-path-app .v2-view small,
+html[data-interface-theme-custom="true"] .core-path-app .v2-view label{
+  color:var(--interface-muted)!important;
+}
+
+/* Book cards intentionally excluded. Their CardRenderer/design styling stays authoritative. */
+.interface-theme-launcher{
+  position:fixed;
+  right:22px;
+  bottom:76px;
+  z-index:5000;
+  min-height:44px;
+  padding:0 16px;
+  border:1px solid var(--v2-accent,#8c78c9);
+  border-radius:12px;
+  color:var(--v2-text,#fff);
+  background:color-mix(in srgb,var(--v2-panel-raised,#171a33) 88%,transparent);
+  box-shadow:0 14px 38px rgba(0,0,0,.35);
+  font-weight:800;
+  cursor:pointer;
+}
+
+.interface-theme-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:100500;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(3,4,10,.72);
+  backdrop-filter:blur(10px);
+}
+
+.interface-theme-dialog{
+  width:min(920px,96vw);
+  max-height:92vh;
+  overflow:auto;
+  padding:22px;
+  border:1px solid var(--v2-border,#30365a);
+  border-radius:20px;
+  color:var(--v2-text,#f4f1ff);
+  background:color-mix(in srgb,var(--v2-panel,#101225) 94%,#05060c);
+  box-shadow:0 30px 90px rgba(0,0,0,.5);
+}
+
+.interface-theme-dialog>header,
+.interface-theme-dialog>footer{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+}
+.interface-theme-dialog>header{align-items:flex-start;margin-bottom:18px}
+.interface-theme-dialog>header p{margin:0 0 4px;color:var(--v2-accent,#8c78c9);text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;font-weight:800}
+.interface-theme-dialog>header h2{margin:0 0 5px}
+.interface-theme-dialog>header span{color:var(--v2-muted,#aaa8c9);font-size:.84rem}
+.interface-theme-dialog>header>button{flex:0 0 42px;width:42px;height:42px}
+.interface-theme-dialog button{min-height:42px;padding:0 13px;border:1px solid var(--v2-border,#30365a);border-radius:10px;color:inherit;background:var(--v2-panel-raised,#171a33);font-weight:750;cursor:pointer}
+.interface-theme-dialog button.is-primary{border-color:var(--v2-accent,#8c78c9);background:var(--v2-accent,#8c78c9)}
+.interface-theme-dialog button:disabled{opacity:.55;cursor:default}
+
+.interface-theme-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:18px}
+.interface-theme-grid>section{padding:18px;border:1px solid var(--v2-border,#30365a);border-radius:16px;background:color-mix(in srgb,var(--v2-panel-raised,#171a33) 74%,transparent)}
+.interface-theme-grid h3{margin:0 0 16px}
+.interface-theme-colors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.interface-theme-color-field,.interface-theme-range-field{display:grid;gap:7px;color:var(--v2-muted,#aaa8c9);font-size:.78rem;font-weight:750}
+.interface-theme-color-field>div{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:9px;min-height:44px;padding:5px 8px;border:1px solid var(--v2-border,#30365a);border-radius:10px;background:var(--v2-panel,#101225)}
+.interface-theme-color-field input{width:44px;height:32px;padding:0;border:0;background:transparent;cursor:pointer}
+.interface-theme-color-field code{color:var(--v2-text,#f4f1ff);font-family:inherit;font-size:.8rem}
+.interface-theme-range-field{margin-bottom:18px}
+.interface-theme-range-field>span{display:flex;justify-content:space-between;gap:10px}
+.interface-theme-range-field strong{color:var(--v2-text,#f4f1ff)}
+.interface-theme-range-field input{width:100%;accent-color:var(--v2-accent,#8c78c9)}
+.interface-theme-preview{margin-top:24px;padding:18px;border:1px solid color-mix(in srgb,var(--v2-accent,#8c78c9) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--v2-panel,#101225) 42%,transparent);backdrop-filter:blur(18px)}
+.interface-theme-preview span{display:block;color:var(--v2-accent,#8c78c9);font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:800}
+.interface-theme-preview strong{display:block;margin:4px 0 7px;font-size:1.2rem}
+.interface-theme-preview p{margin:0;color:var(--v2-muted,#aaa8c9);line-height:1.45}
+.interface-theme-dialog>footer{align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--v2-border,#30365a)}
+.interface-theme-dialog>footer>div:first-child{color:var(--v2-muted,#aaa8c9);font-size:.82rem}
+.interface-theme-dialog>footer>div:last-child{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+
+@media(max-width:760px){
+  .interface-theme-launcher{right:12px;bottom:64px}
+  .interface-theme-backdrop{padding:8px}
+  .interface-theme-dialog{padding:14px}
+  .interface-theme-grid{grid-template-columns:1fr}
+  .interface-theme-colors{grid-template-columns:1fr}
+  .interface-theme-dialog>footer{align-items:stretch;flex-direction:column}
+  .interface-theme-dialog>footer>div:last-child{justify-content:stretch}
+  .interface-theme-dialog>footer button{flex:1}
+}
