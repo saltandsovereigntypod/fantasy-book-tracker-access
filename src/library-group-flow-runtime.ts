@@ -169,6 +169,8 @@ function layoutGrid(grid: HTMLElement) {
   grid.classList.add('is-flow-grouped');
   grid.style.setProperty('position', 'relative', 'important');
 
+  /* Group membership is metadata only. Card geometry is determined solely by
+     the card's absolute visual index, so a new group can never force a new row. */
   placeArticlesContinuously(grid, articles);
 
   articles.forEach((article) => {
