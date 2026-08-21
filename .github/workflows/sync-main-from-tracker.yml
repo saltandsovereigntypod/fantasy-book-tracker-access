@@ -72,9 +72,6 @@ jobs:
           git push origin main
           echo 'changed=true' >> "$GITHUB_OUTPUT"
 
-      - name: Trigger Pages build
-        if: steps.commit.outputs.changed == 'true'
-        working-directory: access
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy-v2-pages.yml --ref main
+      # Pushing main already triggers deploy-v2-pages.yml. Do not dispatch a
+      # second Pages run here, because overlapping deployments can cancel each
+      # other and temporarily leave hashed JS/CSS assets unavailable.
