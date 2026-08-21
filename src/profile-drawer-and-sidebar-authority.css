@@ -1,0 +1,100 @@
+/* Final authority for the Book Profile portal and desktop sidebar scrolling.
+   The drawer is portaled under body, outside .core-path-app, so it must consume
+   the active html theme variables directly instead of relying on app descendants. */
+
+.v2-drawer-backdrop {
+  background: color-mix(in srgb, var(--v2-bg, var(--bg, #09090a)) 58%, transparent) !important;
+}
+
+.v2-book-drawer {
+  border-left-color: var(--v2-border-strong, var(--accent)) !important;
+  color: var(--v2-text, var(--text)) !important;
+  background: color-mix(in srgb, var(--v2-bg, var(--bg)) 92%, var(--v2-panel, var(--panel)) 8%) !important;
+}
+
+.v2-book-drawer > header {
+  border-bottom-color: var(--v2-border, var(--border)) !important;
+}
+
+.v2-book-drawer > header p,
+.v2-book-drawer .v2-section-heading > button,
+.v2-book-drawer .v2-section-heading > span {
+  color: var(--v2-accent, var(--accent)) !important;
+}
+
+.v2-book-drawer > header span,
+.v2-book-drawer__metrics small,
+.v2-book-drawer .v2-profile-form label {
+  color: var(--v2-muted, var(--muted)) !important;
+}
+
+.v2-book-drawer > header > button,
+.v2-book-drawer .v2-book-drawer__actions button:not(.is-danger),
+.v2-book-drawer .v2-profile-form > button,
+.v2-book-drawer .v2-inline-form > button {
+  border-color: var(--v2-accent, var(--accent)) !important;
+  color: var(--v2-text, var(--text)) !important;
+  background: var(--v2-accent, var(--accent)) !important;
+}
+
+.v2-book-drawer__metrics span,
+.v2-book-drawer > section:not(.v2-book-drawer__metrics),
+.v2-book-drawer section article {
+  border-color: var(--v2-border, var(--border)) !important;
+  color: var(--v2-text, var(--text)) !important;
+  background: var(--v2-panel, var(--panel)) !important;
+}
+
+.v2-book-drawer section article {
+  background: var(--v2-panel-raised, var(--panel-2)) !important;
+}
+
+.v2-book-drawer h3,
+.v2-book-drawer h4,
+.v2-book-drawer section p,
+.v2-book-drawer section li,
+.v2-book-drawer .v2-profile-chips span {
+  color: var(--v2-text, var(--text)) !important;
+}
+
+.v2-book-drawer .v2-profile-form input,
+.v2-book-drawer .v2-profile-form select,
+.v2-book-drawer .v2-profile-form textarea,
+.v2-book-drawer .v2-inline-form input,
+.v2-book-drawer .v2-inline-form textarea {
+  border-color: var(--v2-border, var(--border)) !important;
+  color: var(--v2-text, var(--text)) !important;
+  background: color-mix(in srgb, var(--v2-panel-raised, var(--panel-2)) 88%, var(--v2-bg, var(--bg)) 12%) !important;
+}
+
+.v2-book-drawer .v2-profile-chips span {
+  border-color: var(--v2-border-strong, var(--accent)) !important;
+  background: var(--path-accent-soft, color-mix(in srgb, var(--v2-accent, var(--accent)) 18%, transparent)) !important;
+}
+
+.v2-book-drawer button.is-danger,
+.v2-book-drawer .v2-note-delete {
+  border-color: color-mix(in srgb, #b84848 68%, var(--v2-border, var(--border))) !important;
+  color: color-mix(in srgb, #ffd6d2 84%, var(--v2-text, var(--text))) !important;
+}
+
+/* The desktop sidebar is viewport-height and therefore owns its own vertical
+   scrolling. This applies equally to Rider, every other Empyrean path, and all
+   Prythian courts. */
+@media (min-width: 701px) {
+  .core-path-app .v2-app-sidebar {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Preserve the established mobile horizontal navigation strip. */
+@media (max-width: 700px) {
+  .core-path-app .v2-app-sidebar {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-gutter: auto;
+  }
+}
