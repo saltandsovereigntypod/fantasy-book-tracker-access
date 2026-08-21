@@ -1,0 +1,91 @@
+/* Shared Library grouping behavior for every path and court.
+   Themes still own their palette. This file only guarantees that grouped
+   libraries receive the same flow, dividers, and alternating wrapper treatment. */
+
+.core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--v2-panel, var(--panel, #17171a)) 84%, var(--v2-accent, var(--accent, #6f2833)) 16%),
+    color-mix(in srgb, var(--v2-panel, var(--panel, #17171a)) 92%, var(--v2-accent, var(--accent, #6f2833)) 8%)
+  ) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border, #3a3a40)) 74%, var(--v2-accent, var(--accent, #6f2833)) 26%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--v2-accent, var(--accent, #6f2833)) 10%, transparent),
+    inset 0 10px 26px color-mix(in srgb, var(--v2-accent, var(--accent, #6f2833)) 5%, transparent) !important;
+}
+
+.core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--v2-panel, var(--panel, #17171a)) 87%, var(--v2-panel-raised, var(--panel-2, #222228)) 13%),
+    color-mix(in srgb, var(--v2-panel, var(--panel, #17171a)) 94%, var(--v2-muted, var(--muted, #98938c)) 6%)
+  ) !important;
+  border-color: color-mix(in srgb, var(--v2-border, var(--border, #3a3a40)) 84%, var(--v2-muted, var(--muted, #98938c)) 16%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--v2-muted, var(--muted, #98938c)) 7%, transparent),
+    inset 0 10px 26px color-mix(in srgb, var(--v2-muted, var(--muted, #98938c)) 4%, transparent) !important;
+}
+
+html[data-library-backing-custom='true'] .core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--library-backing-color) var(--library-backing-opacity), transparent) 88%,
+    var(--v2-accent, var(--accent, #6f2833)) 12%
+  ) !important;
+}
+
+html[data-library-backing-custom='true'] .core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--library-backing-color) var(--library-backing-opacity), transparent) 94%,
+    var(--v2-muted, var(--muted, #98938c)) 6%
+  ) !important;
+}
+
+html[data-library-backing-visible='false'] .core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a,
+html[data-library-backing-visible='false'] .core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 761px) {
+  .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped {
+    position: relative !important;
+    box-sizing: border-box !important;
+    padding-block-start: 28px !important;
+    row-gap: 44px !important;
+  }
+
+  .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > .library-group-marker {
+    position: absolute !important;
+    z-index: 4 !important;
+    grid-column: auto !important;
+    inline-size: var(--group-flow-width, auto) !important;
+    min-height: 20px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    left: var(--group-flow-left, 0px) !important;
+    top: var(--group-flow-top, 0px) !important;
+    box-sizing: border-box !important;
+    pointer-events: auto;
+  }
+
+  .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group) {
+    position: relative !important;
+  }
+
+  .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group)::before {
+    content: '' !important;
+    position: absolute !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+    inset-block: 5% !important;
+    inset-inline-start: -13px !important;
+    inline-size: 2px !important;
+    border-radius: 999px !important;
+    background: color-mix(in srgb, var(--v2-accent, var(--accent, #6f2833)) 28%, var(--v2-border-strong, var(--v2-border, var(--border, #3a3a40))) 72%) !important;
+    box-shadow: 0 0 7px color-mix(in srgb, var(--v2-accent, var(--accent, #6f2833)) 12%, transparent) !important;
+    opacity: .72 !important;
+  }
+}
