@@ -29,7 +29,7 @@ function applyMarkerFlow(marker: HTMLElement, left: number, top: number, width: 
   marker.style.setProperty('inline-size', `${width}px`, 'important');
   marker.style.setProperty('width', `${width}px`, 'important');
   marker.style.setProperty('margin', '0', 'important');
-  marker.style.setProperty('padding', '0 4px', 'important');
+  marker.style.setProperty('padding', '0', 'important');
   marker.style.setProperty('--group-flow-left', `${left}px`);
   marker.style.setProperty('--group-flow-top', `${top}px`);
   marker.style.setProperty('--group-flow-width', `${width}px`);
@@ -62,7 +62,7 @@ function layoutGrid(grid: HTMLElement) {
     }
 
     const left = firstArticle.offsetLeft;
-    const top = Math.max(2, firstArticle.offsetTop - 30);
+    const top = Math.max(4, firstArticle.offsetTop - 40);
     const width = firstArticle.offsetWidth;
     applyMarkerFlow(marker, left, top, width);
   });
