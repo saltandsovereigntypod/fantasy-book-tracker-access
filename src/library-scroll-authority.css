@@ -1,0 +1,6 @@
+/* On Library/Campaigns/Chronicles pages, the welcome banner is normal page content.
+   The sidebar can remain sticky, but the topbar should scroll away with the books. */
+.core-path-app .v2-app-main:has(.v2-view--library) > .v2-topbar {
+  position: static !important;
+  top: auto !important;
+}
