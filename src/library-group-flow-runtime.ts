@@ -53,10 +53,6 @@ function clearMarkerFlow(marker: HTMLElement) {
 }
 
 function applyMarkerFlow(marker: HTMLElement, left: number, top: number, width: number) {
-  /* Group markers are DOM siblings of cards so drag ordering remains simple,
-     but they must never participate in CSS Grid placement on desktop. Keep
-     this structural rule inline and !important so theme/layout styles cannot
-     turn a heading back into a full-width grid row. */
   marker.style.setProperty('position', 'absolute', 'important');
   marker.style.setProperty('grid-column', 'auto', 'important');
   marker.style.setProperty('left', `${left}px`, 'important');
@@ -70,16 +66,6 @@ function applyMarkerFlow(marker: HTMLElement, left: number, top: number, width: 
   marker.style.setProperty('--group-flow-width', `${width}px`);
 }
 
-function firstArticleAfter(marker: HTMLElement): HTMLElement | null {
-  let sibling = marker.nextElementSibling;
-  while (sibling) {
-    if (sibling instanceof HTMLElement && sibling.matches('.library-group-marker')) return null;
-    if (sibling instanceof HTMLElement && sibling.matches('article')) return sibling;
-    sibling = sibling.nextElementSibling;
-  }
-  return null;
-}
-
 function articlesAfter(marker: HTMLElement): HTMLElement[] {
   const articles: HTMLElement[] = [];
   let sibling = marker.nextElementSibling;
@@ -89,6 +75,36 @@ function articlesAfter(marker: HTMLElement): HTMLElement[] {
     sibling = sibling.nextElementSibling;
   }
   return articles;
+}
+
+function articleByBookId(articles: HTMLElement[], bookId: string | undefined): HTMLElement | null {
+  if (!bookId) return null;
+  return articles.find((article) => article.dataset.bookId === bookId) ?? null;
+}
+
+function captureAndNormalizeGroups(grid: HTMLElement, markers: HTMLElement[], articles: HTMLElement[]) {
+  const freshMarkers = markers.some((marker) => !marker.dataset.groupFirstBookId);
+
+  if (freshMarkers) {
+    articles.forEach((article) => {
+      delete article.dataset.libraryGroupIndex;
+      delete article.dataset.libraryGroupStart;
+    });
+
+    markers.forEach((marker, index) => {
+      const groupArticles = articlesAfter(marker);
+      marker.dataset.groupIndex = String(index);
+      marker.dataset.groupFirstBookId = groupArticles[0]?.dataset.bookId || '';
+      groupArticles.forEach((article, articleIndex) => {
+        article.dataset.libraryGroupIndex = String(index);
+        if (articleIndex === 0) article.dataset.libraryGroupStart = 'true';
+        else delete article.dataset.libraryGroupStart;
+      });
+    });
+  }
+
+  const interleaved = markers.some((marker) => articlesAfter(marker).length > 0);
+  if (interleaved) markers.forEach((marker) => grid.appendChild(marker));
 }
 
 function layoutGrid(grid: HTMLElement) {
@@ -102,42 +118,52 @@ function layoutGrid(grid: HTMLElement) {
 
   if (markers.length === 0) {
     grid.classList.remove('is-flow-grouped', 'is-grouped-tinted');
+    articles.forEach((article) => {
+      delete article.dataset.libraryGroupIndex;
+      delete article.dataset.libraryGroupStart;
+    });
     return;
   }
 
   grid.classList.add('is-grouped-tinted');
-  markers.forEach((marker, index) => {
-    const toneClass = index % 2 === 0 ? 'is-flow-group-tone-a' : 'is-flow-group-tone-b';
-    articlesAfter(marker).forEach((article) => article.classList.add(toneClass));
-  });
 
   if (!desktop) {
+    markers.forEach((marker, index) => {
+      const toneClass = index % 2 === 0 ? 'is-flow-group-tone-a' : 'is-flow-group-tone-b';
+      articlesAfter(marker).forEach((article, articleIndex) => {
+        article.classList.add(toneClass);
+        if (articleIndex === 0) article.classList.add('is-flow-group-start');
+      });
+    });
     grid.classList.remove('is-flow-grouped');
     markers.forEach(clearMarkerFlow);
     return;
   }
 
+  captureAndNormalizeGroups(grid, markers, articles);
   grid.classList.add('is-flow-grouped');
   grid.style.setProperty('position', 'relative', 'important');
 
-  /* First remove every heading from grid flow. This is intentionally done
-     before reading article offsets: otherwise a marker can create the very
-     empty row whose coordinates we are trying to eliminate. */
+  articles.forEach((article) => {
+    const groupIndex = Number(article.dataset.libraryGroupIndex);
+    if (!Number.isFinite(groupIndex)) return;
+    article.classList.add(groupIndex % 2 === 0 ? 'is-flow-group-tone-a' : 'is-flow-group-tone-b');
+    if (article.dataset.libraryGroupStart === 'true') article.classList.add('is-flow-group-start');
+  });
+
+  const starts = articles.filter((article) => article.dataset.libraryGroupStart === 'true');
+  starts[0]?.classList.add('is-flow-first-group');
+
   markers.forEach((marker) => {
     marker.style.setProperty('position', 'absolute', 'important');
     marker.style.setProperty('grid-column', 'auto', 'important');
     marker.style.setProperty('margin', '0', 'important');
-  });
 
-  markers.forEach((marker, index) => {
-    const firstArticle = firstArticleAfter(marker);
+    const firstArticle = articleByBookId(articles, marker.dataset.groupFirstBookId);
     if (!firstArticle) {
       clearMarkerFlow(marker);
       return;
     }
-
-    firstArticle.classList.add('is-flow-group-start');
-    if (index === 0) firstArticle.classList.add('is-flow-first-group');
 
     const left = firstArticle.offsetLeft;
     const top = Math.max(2, firstArticle.offsetTop - 24);
