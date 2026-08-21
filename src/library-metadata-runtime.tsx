@@ -14,6 +14,9 @@ type ExtendedArchive = V2ArchiveState & {
 };
 type SortCriterion = 'none'|'manual'|'updated-new'|'updated-old'|'created-new'|'created-old'|'title-az'|'title-za'|'author-az'|'author-za'|'series-az'|'series-za'|'series-number'|'rating-high'|'rating-low'|'spice-high'|'impact-high'|'progress-high'|'progress-low'|'status'|'favorite-first';
 
+type MappedBook = { article: HTMLElement; book: V2BookRecord };
+
+const DESKTOP_QUERY = '(min-width: 761px)';
 const SORT_OPTIONS: Array<[SortCriterion,string]> = [
   ['none','None'],['manual','Manual order'],['series-az','Series A to Z'],['series-za','Series Z to A'],['series-number','Number in series'],['title-az','Title A to Z'],['title-za','Title Z to A'],['author-az','Author A to Z'],['author-za','Author Z to A'],['updated-new','Recently updated'],['updated-old','Least recently updated'],['created-new','Newest added'],['created-old','Oldest added'],['rating-high','Rating high to low'],['rating-low','Rating low to high'],['progress-high','Progress high to low'],['progress-low','Progress low to high'],['spice-high','Spice high to low'],['impact-high','Emotional impact high to low'],['status','Reading status'],['favorite-first','Favorites first'],
 ];
@@ -76,6 +79,34 @@ function moveBefore(order:string[],dragged:string,target:string):string[] {
   next.splice(targetIndex,0,dragged);
   return next;
 }
+function clearGroupDecoration(article:HTMLElement){
+  article.classList.remove('is-flow-group-start','is-flow-first-group','is-flow-group-tone-a','is-flow-group-tone-b');
+  delete article.dataset.libraryGroupIndex;
+  delete article.dataset.libraryGroupStart;
+}
+function decorateGroup(entries:MappedBook[],groupIndex:number){
+  const tone=groupIndex%2===0?'is-flow-group-tone-a':'is-flow-group-tone-b';
+  entries.forEach((entry,index)=>{
+    entry.article.dataset.libraryGroupIndex=String(groupIndex);
+    entry.article.classList.add(tone);
+    if(index===0){
+      entry.article.dataset.libraryGroupStart='true';
+      entry.article.classList.add('is-flow-group-start');
+      if(groupIndex===0)entry.article.classList.add('is-flow-first-group');
+    }
+  });
+}
+function createGroupMarker(label:string,index:number,entries:MappedBook[]):HTMLElement{
+  const marker=document.createElement('div');
+  marker.className='library-group-marker is-manual-draggable';
+  marker.dataset.groupLabel=label;
+  marker.dataset.groupIndex=String(index);
+  marker.dataset.groupFirstBookId=entries[0]?.book.id||'';
+  marker.draggable=true;
+  marker.title='Drag to reorder groups';
+  marker.innerHTML=`<span>${label}</span><em>Drag group</em>`;
+  return marker;
+}
 
 function LibraryMetadataTools(){
   const[archive,setArchive]=useState<ExtendedArchive|null>(null); const[editorTarget,setEditorTarget]=useState<Element|null>(null); const[libraryTarget,setLibraryTarget]=useState<Element|null>(null); const[currentBookId,setCurrentBookId]=useState(''); const[position,setPosition]=useState(''); const[saveState,setSaveState]=useState('');
@@ -109,7 +140,9 @@ function LibraryMetadataTools(){
       if(!grid){arranging=false;observe();return;}
       grid.classList.toggle('is-manual-order',primary==='manual');
       grid.querySelectorAll(':scope > .library-group-marker').forEach(marker=>marker.remove());
-      const articles=[...grid.querySelectorAll<HTMLElement>(':scope > article')]; const used=new Set<string>();
+      const articles=[...grid.querySelectorAll<HTMLElement>(':scope > article')];
+      articles.forEach(clearGroupDecoration);
+      const used=new Set<string>();
       const mapped=articles.map(article=>{
         const existingId=article.dataset.bookId;
         const existingBook=existingId?archive.books.find(item=>item.id===existingId&&!used.has(item.id)):undefined;
@@ -119,26 +152,43 @@ function LibraryMetadataTools(){
         if(book){used.add(book.id);article.dataset.bookId=book.id;}
         article.draggable=primary==='manual'; article.classList.toggle('is-manual-draggable',primary==='manual');
         return{article,book};
-      }).filter((entry):entry is {article:HTMLElement;book:V2BookRecord}=>Boolean(entry.book));
+      }).filter((entry):entry is MappedBook=>Boolean(entry.book));
       const manualOrder=completeBookOrder(archive);
       mapped.sort((a,b)=>compareBooks(a.book,b.book,[primary,secondary,tertiary],archive.bookSeriesPositions||{},manualOrder));
 
-      if(group==='none')mapped.forEach(entry=>grid.appendChild(entry.article));
-      else{
-        const buckets=new Map<string,typeof mapped>();
+      if(group==='none'){
+        grid.classList.remove('is-grouped-tinted','is-flow-grouped');
+        mapped.forEach(entry=>grid.appendChild(entry.article));
+      }else{
+        const buckets=new Map<string,MappedBook[]>();
         mapped.forEach(entry=>{const label=groupLabel(entry.book,group);buckets.set(label,[...(buckets.get(label)||[]),entry]);});
+        const naturalLabels=[...buckets.keys()];
         const savedGroupOrder=archive.libraryManualGroupOrder?.[group]||[];
-        const labels=[...buckets.keys()].sort((a,b)=>{
+        const labels=[...naturalLabels].sort((a,b)=>{
           const ai=orderedIndex(savedGroupOrder,a),bi=orderedIndex(savedGroupOrder,b);
           if(ai!==bi)return ai-bi;
-          return [...buckets.keys()].indexOf(a)-[...buckets.keys()].indexOf(b);
+          return naturalLabels.indexOf(a)-naturalLabels.indexOf(b);
         });
-        labels.forEach(label=>{
-          const marker=document.createElement('div'); marker.className='library-group-marker is-manual-draggable'; marker.dataset.groupLabel=label; marker.draggable=true; marker.title='Drag to reorder groups'; marker.innerHTML=`<span>${label}</span><em>Drag group</em>`; grid.appendChild(marker);
-          (buckets.get(label)||[]).forEach(entry=>grid.appendChild(entry.article));
-        });
+        const desktop=window.matchMedia(DESKTOP_QUERY).matches;
+        grid.classList.add('is-grouped-tinted');
+        grid.classList.toggle('is-flow-grouped',desktop);
+
+        if(desktop){
+          const ordered:MappedBook[]=[];
+          labels.forEach((label,index)=>{const entries=buckets.get(label)||[];decorateGroup(entries,index);ordered.push(...entries);});
+          ordered.forEach(entry=>grid.appendChild(entry.article));
+          labels.forEach((label,index)=>grid.appendChild(createGroupMarker(label,index,buckets.get(label)||[])));
+        }else{
+          labels.forEach((label,index)=>{
+            const entries=buckets.get(label)||[];
+            decorateGroup(entries,index);
+            grid.appendChild(createGroupMarker(label,index,entries));
+            entries.forEach(entry=>grid.appendChild(entry.article));
+          });
+        }
       }
       arranging=false; observe();
+      window.dispatchEvent(new CustomEvent('library-groups-arranged'));
     };
     const scheduleArrange=()=>{if(arranging)return;if(timer!==null)window.clearTimeout(timer);timer=window.setTimeout(()=>{timer=null;arrangeGrid();},20);};
     observer=new MutationObserver((mutations)=>{if(arranging)return;const shouldArrange=mutations.some(mutation=>[...mutation.addedNodes,...mutation.removedNodes].some(node=>node instanceof HTMLElement&&(node.matches('article,.v2-library-grid,.v2-empty-state')||Boolean(node.querySelector?.('article,.v2-library-grid,.v2-empty-state')))));if(shouldArrange)scheduleArrange();});
@@ -174,8 +224,9 @@ function LibraryMetadataTools(){
       if(group!=='none'&&groupLabel(draggedRecord,group)!==groupLabel(targetRecord,group))return;
       event.preventDefault(); const order=moveBefore(completeBookOrder(archive),draggedBook,targetBook); void saveMetadata({libraryManualBookOrder:order});
     };
+    window.addEventListener('resize',scheduleArrange,{passive:true});
     libraryView.addEventListener('dragstart',dragStart);libraryView.addEventListener('dragend',dragEnd);libraryView.addEventListener('dragover',dragOver);libraryView.addEventListener('drop',drop);
-    return()=>{observer?.disconnect();if(timer!==null)window.clearTimeout(timer);libraryView.removeEventListener('dragstart',dragStart);libraryView.removeEventListener('dragend',dragEnd);libraryView.removeEventListener('dragover',dragOver);libraryView.removeEventListener('drop',drop);};
+    return()=>{observer?.disconnect();if(timer!==null)window.clearTimeout(timer);window.removeEventListener('resize',scheduleArrange);libraryView.removeEventListener('dragstart',dragStart);libraryView.removeEventListener('dragend',dragEnd);libraryView.removeEventListener('dragover',dragOver);libraryView.removeEventListener('drop',drop);};
   },[libraryTarget,archive,primary,secondary,tertiary,group,booksByTitle]);
 
   async function savePosition(){if(!archive||!currentBookId)return;const clean=position.trim();const nextMap={...(archive.bookSeriesPositions||{})};if(!clean||clean.toLowerCase()==='n/a'||clean.toLowerCase()==='na')delete nextMap[currentBookId];else nextMap[currentBookId]=clean;await saveMetadata({bookSeriesPositions:nextMap},'Saving…');if(!clean||clean.toLowerCase()==='n/a'||clean.toLowerCase()==='na')setSaveState('Standalone book');}
