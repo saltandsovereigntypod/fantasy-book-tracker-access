@@ -62,8 +62,8 @@ function layoutGrid(grid: HTMLElement) {
     }
 
     const left = firstArticle.offsetLeft;
-    const top = Math.max(2, firstArticle.offsetTop - 24);
-    const width = Math.max(firstArticle.offsetWidth, grid.clientWidth - left);
+    const top = Math.max(2, firstArticle.offsetTop - 30);
+    const width = firstArticle.offsetWidth;
     applyMarkerFlow(marker, left, top, width);
   });
 }
