@@ -69,6 +69,7 @@ import './interface-theme-label-help.css';
 import './interface-theme-launcher-position.css';
 import './library-settings-collapse.css';
 import './profile-drawer-and-sidebar-authority.css';
+import './library-group-universal-authority.css';
 import './mobile-card-editor-authority.css';
 import './mobile-overflow-authority.css';
 
