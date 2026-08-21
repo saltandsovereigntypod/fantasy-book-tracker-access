@@ -26,6 +26,7 @@ import './interface-background-customizer-runtime';
 import './interface-theme-label-help-runtime';
 import './library-quick-add-runtime';
 import './recent-colors-runtime';
+import './library-card-identity-runtime';
 import './library-preferences-runtime';
 import './library-metadata-runtime';
 import './library-group-flow-runtime';
@@ -70,6 +71,7 @@ import './interface-theme-launcher-position.css';
 import './library-settings-collapse.css';
 import './profile-drawer-and-sidebar-authority.css';
 import './library-group-universal-authority.css';
+import './library-scroll-authority.css';
 import './mobile-card-editor-authority.css';
 import './mobile-overflow-authority.css';
 
