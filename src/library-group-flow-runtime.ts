@@ -41,6 +41,7 @@ function ensureStyle() {
 function clearMarkerFlow(marker: HTMLElement) {
   marker.style.removeProperty('position');
   marker.style.removeProperty('grid-column');
+  marker.style.removeProperty('grid-row');
   marker.style.removeProperty('left');
   marker.style.removeProperty('top');
   marker.style.removeProperty('inline-size');
@@ -52,9 +53,31 @@ function clearMarkerFlow(marker: HTMLElement) {
   marker.style.removeProperty('--group-flow-width');
 }
 
+function clearArticlePlacement(article: HTMLElement) {
+  article.style.removeProperty('grid-column');
+  article.style.removeProperty('grid-row');
+}
+
+function resolvedColumnCount(grid: HTMLElement): number {
+  const template = getComputedStyle(grid).gridTemplateColumns.trim();
+  if (!template || template === 'none') return 1;
+  return Math.max(1, template.split(/\s+/).filter(Boolean).length);
+}
+
+function placeArticlesContinuously(grid: HTMLElement, articles: HTMLElement[]) {
+  const columns = resolvedColumnCount(grid);
+  articles.forEach((article, index) => {
+    const column = (index % columns) + 1;
+    const row = Math.floor(index / columns) + 1;
+    article.style.setProperty('grid-column', String(column), 'important');
+    article.style.setProperty('grid-row', String(row), 'important');
+  });
+}
+
 function applyMarkerFlow(marker: HTMLElement, left: number, top: number, width: number) {
   marker.style.setProperty('position', 'absolute', 'important');
   marker.style.setProperty('grid-column', 'auto', 'important');
+  marker.style.setProperty('grid-row', 'auto', 'important');
   marker.style.setProperty('left', `${left}px`, 'important');
   marker.style.setProperty('top', `${top}px`, 'important');
   marker.style.setProperty('inline-size', `${width}px`, 'important');
@@ -103,10 +126,6 @@ function captureAndNormalizeGroups(grid: HTMLElement, markers: HTMLElement[], ar
     });
   }
 
-  /* The metadata layer intentionally emits marker -> cards -> marker -> cards.
-     That DOM topology is inherently sectioned. On desktop, preserve its group
-     metadata but move every marker after the cards so the CSS grid contains one
-     uninterrupted card sequence. Markers are then positioned as overlays. */
   const interleaved = markers.some((marker) => articlesAfter(marker).length > 0);
   if (interleaved) markers.forEach((marker) => grid.appendChild(marker));
 }
@@ -123,6 +142,7 @@ function layoutGrid(grid: HTMLElement) {
   if (markers.length === 0) {
     grid.classList.remove('is-flow-grouped', 'is-grouped-tinted');
     articles.forEach((article) => {
+      clearArticlePlacement(article);
       delete article.dataset.libraryGroupIndex;
       delete article.dataset.libraryGroupStart;
     });
@@ -132,6 +152,7 @@ function layoutGrid(grid: HTMLElement) {
   grid.classList.add('is-grouped-tinted');
 
   if (!desktop) {
+    articles.forEach(clearArticlePlacement);
     markers.forEach((marker, index) => {
       const toneClass = index % 2 === 0 ? 'is-flow-group-tone-a' : 'is-flow-group-tone-b';
       articlesAfter(marker).forEach((article, articleIndex) => {
@@ -148,6 +169,8 @@ function layoutGrid(grid: HTMLElement) {
   grid.classList.add('is-flow-grouped');
   grid.style.setProperty('position', 'relative', 'important');
 
+  placeArticlesContinuously(grid, articles);
+
   articles.forEach((article) => {
     const groupIndex = Number(article.dataset.libraryGroupIndex);
     if (!Number.isFinite(groupIndex)) return;
@@ -158,21 +181,24 @@ function layoutGrid(grid: HTMLElement) {
   const starts = articles.filter((article) => article.dataset.libraryGroupStart === 'true');
   starts[0]?.classList.add('is-flow-first-group');
 
-  markers.forEach((marker) => {
-    marker.style.setProperty('position', 'absolute', 'important');
-    marker.style.setProperty('grid-column', 'auto', 'important');
-    marker.style.setProperty('margin', '0', 'important');
+  requestAnimationFrame(() => {
+    markers.forEach((marker) => {
+      marker.style.setProperty('position', 'absolute', 'important');
+      marker.style.setProperty('grid-column', 'auto', 'important');
+      marker.style.setProperty('grid-row', 'auto', 'important');
+      marker.style.setProperty('margin', '0', 'important');
 
-    const firstArticle = articleByBookId(articles, marker.dataset.groupFirstBookId);
-    if (!firstArticle) {
-      clearMarkerFlow(marker);
-      return;
-    }
+      const firstArticle = articleByBookId(articles, marker.dataset.groupFirstBookId);
+      if (!firstArticle) {
+        clearMarkerFlow(marker);
+        return;
+      }
 
-    const left = firstArticle.offsetLeft;
-    const top = Math.max(2, firstArticle.offsetTop - 24);
-    const width = firstArticle.offsetWidth;
-    applyMarkerFlow(marker, left, top, width);
+      const left = firstArticle.offsetLeft;
+      const top = Math.max(2, firstArticle.offsetTop - 24);
+      const width = firstArticle.offsetWidth;
+      applyMarkerFlow(marker, left, top, width);
+    });
   });
 }
 
