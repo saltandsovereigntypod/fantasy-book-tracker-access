@@ -52,19 +52,27 @@ html[data-library-backing-visible='false'] .core-path-app .v2-view--library .v2-
 }
 
 @media (min-width: 761px) {
-  /* Markers float over the continuous card grid instead of consuming an entire
-     grid row. A new group can begin in the next available column. */
+  /* Group headings are overlays. Dense auto-placement is the actual packing
+     authority so later groups backfill every open card slot instead of starting
+     a fresh visual row after a group boundary. */
   .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped {
     position: relative !important;
     box-sizing: border-box !important;
     padding-block-start: 28px !important;
     row-gap: 44px !important;
+    grid-auto-flow: row dense !important;
+  }
+
+  .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > article {
+    grid-column: auto !important;
+    grid-row: auto !important;
   }
 
   .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > .library-group-marker {
     position: absolute !important;
     z-index: 4 !important;
     grid-column: auto !important;
+    grid-row: auto !important;
     inline-size: var(--group-flow-width, auto) !important;
     min-height: 20px !important;
     margin: 0 !important;
