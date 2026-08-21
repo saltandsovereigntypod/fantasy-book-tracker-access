@@ -66,7 +66,15 @@ function setCollapsed(library: HTMLElement, collapsed: boolean) {
 
 function ensureCollapseUi(library: HTMLElement) {
   const controls = library.querySelector<HTMLElement>('.v2-library-controls');
-  if (!controls) return;
+  const actionbar = library.querySelector<HTMLElement>('.v2-library-actionbar');
+  if (!controls || !actionbar) return;
+
+  let shell = library.querySelector<HTMLElement>('.library-settings-command-bar');
+  if (!shell) {
+    shell = document.createElement('div');
+    shell.className = 'library-settings-command-bar';
+    controls.insertAdjacentElement('beforebegin', shell);
+  }
 
   let toggle = library.querySelector<HTMLButtonElement>('.library-settings-toggle');
   if (!toggle) {
@@ -74,7 +82,6 @@ function ensureCollapseUi(library: HTMLElement) {
     toggle.type = 'button';
     toggle.className = 'library-settings-toggle';
     toggle.innerHTML = '<span class="library-settings-toggle-label">Library settings</span><span class="library-settings-toggle-state">Hide</span><span class="library-settings-toggle-chevron" aria-hidden="true">⌄</span>';
-    controls.insertAdjacentElement('beforebegin', toggle);
     toggle.addEventListener('click', () => {
       const collapsed = !library.classList.contains('library-settings-collapsed');
       writeLocal({ settingsCollapsed: collapsed });
@@ -83,6 +90,9 @@ function ensureCollapseUi(library: HTMLElement) {
       window.dispatchEvent(new CustomEvent('library-settings-visibility-changed', { detail: { collapsed } }));
     });
   }
+
+  if (toggle.parentElement !== shell) shell.prepend(toggle);
+  if (actionbar.parentElement !== shell) shell.append(actionbar);
 
   setCollapsed(library, preferences.settingsCollapsed === true);
 }
