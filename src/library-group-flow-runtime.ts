@@ -103,6 +103,10 @@ function captureAndNormalizeGroups(grid: HTMLElement, markers: HTMLElement[], ar
     });
   }
 
+  /* The metadata layer intentionally emits marker -> cards -> marker -> cards.
+     That DOM topology is inherently sectioned. On desktop, preserve its group
+     metadata but move every marker after the cards so the CSS grid contains one
+     uninterrupted card sequence. Markers are then positioned as overlays. */
   const interleaved = markers.some((marker) => articlesAfter(marker).length > 0);
   if (interleaved) markers.forEach((marker) => grid.appendChild(marker));
 }
