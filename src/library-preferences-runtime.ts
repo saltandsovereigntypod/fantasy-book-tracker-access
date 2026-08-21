@@ -16,6 +16,8 @@ const LOCAL_KEY = 'empyrean-v2-library-preferences';
 let preferences: LibraryPreferences = readLocal();
 let hydrated = false;
 let saveTimer: number | null = null;
+let pendingCloudSave = false;
+const dirtyKeys = new Set<keyof LibraryPreferences>();
 
 function readLocal(): LibraryPreferences {
   try {
@@ -26,9 +28,14 @@ function readLocal(): LibraryPreferences {
   }
 }
 
-function writeLocal(next: LibraryPreferences) {
+function writeLocal(next: LibraryPreferences, markDirty = false) {
   preferences = { ...preferences, ...next };
+  if (markDirty) (Object.keys(next) as Array<keyof LibraryPreferences>).forEach((key) => dirtyKeys.add(key));
   try { localStorage.setItem(LOCAL_KEY, JSON.stringify(preferences)); } catch {}
+}
+
+function emitPreferences() {
+  window.dispatchEvent(new CustomEvent('library-preferences-updated', { detail: { ...preferences } }));
 }
 
 function selectKind(select: HTMLSelectElement): keyof LibraryPreferences | null {
@@ -84,8 +91,9 @@ function ensureCollapseUi(library: HTMLElement) {
     toggle.innerHTML = '<span class="library-settings-toggle-label">Library settings</span><span class="library-settings-toggle-state">Hide</span><span class="library-settings-toggle-chevron" aria-hidden="true">⌄</span>';
     toggle.addEventListener('click', () => {
       const collapsed = !library.classList.contains('library-settings-collapsed');
-      writeLocal({ settingsCollapsed: collapsed });
+      writeLocal({ settingsCollapsed: collapsed }, true);
       setCollapsed(library, collapsed);
+      emitPreferences();
       scheduleCloudSave();
       window.dispatchEvent(new CustomEvent('library-settings-visibility-changed', { detail: { collapsed } }));
     });
@@ -117,7 +125,12 @@ async function loadCloudPreferences() {
     const state = row?.state && typeof row.state === 'object' ? row.state as Record<string, unknown> : {};
     const cloud = state.libraryPreferences;
     if (cloud && typeof cloud === 'object' && !Array.isArray(cloud)) {
-      preferences = { ...preferences, ...(cloud as LibraryPreferences) };
+      const incoming = cloud as LibraryPreferences;
+      const merged: LibraryPreferences = { ...preferences };
+      (Object.keys(incoming) as Array<keyof LibraryPreferences>).forEach((key) => {
+        if (!dirtyKeys.has(key)) merged[key] = incoming[key] as never;
+      });
+      preferences = merged;
       writeLocal(preferences);
     }
   } catch {
@@ -125,11 +138,17 @@ async function loadCloudPreferences() {
   } finally {
     hydrated = true;
     applyAll();
+    emitPreferences();
+    if (pendingCloudSave || dirtyKeys.size > 0) scheduleCloudSave();
   }
 }
 
 async function saveCloudPreferences() {
-  if (!hydrated) return;
+  if (!hydrated) {
+    pendingCloudSave = true;
+    return;
+  }
+  pendingCloudSave = false;
   try {
     const { user } = await getAuthSnapshot();
     if (!user) return;
@@ -141,19 +160,28 @@ async function saveCloudPreferences() {
       .limit(1);
     if (error) throw error;
     const row = Array.isArray(data) ? data[0] : undefined;
-    if (!row?.state || typeof row.state !== 'object') return;
-    const state = row.state as Record<string, unknown>;
-    const { error: updateError } = await supabase
-      .from('archive_states')
-      .update({ state: { ...state, libraryPreferences: preferences }, updated_at: new Date().toISOString() })
-      .eq('user_id', user.id);
-    if (updateError) throw updateError;
+    const state = row?.state && typeof row.state === 'object' ? row.state as Record<string, unknown> : {};
+    const payload = { state: { ...state, libraryPreferences: preferences }, updated_at: new Date().toISOString() };
+    if (row) {
+      const { error: updateError } = await supabase
+        .from('archive_states')
+        .update(payload)
+        .eq('user_id', user.id);
+      if (updateError) throw updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from('archive_states')
+        .insert({ user_id: user.id, ...payload });
+      if (insertError) throw insertError;
+    }
+    dirtyKeys.clear();
   } catch {
-    // Preferences stay local and will retry on a later change.
+    pendingCloudSave = true;
   }
 }
 
 function scheduleCloudSave() {
+  pendingCloudSave = true;
   if (saveTimer !== null) window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
     saveTimer = null;
@@ -166,7 +194,8 @@ function handleChange(event: Event) {
   if (!select || !select.matches('.v2-view--library .v2-library-controls select, .v2-view--library .advanced-library-sort select')) return;
   const kind = selectKind(select);
   if (!kind || kind === 'settingsCollapsed') return;
-  writeLocal({ [kind]: select.value });
+  writeLocal({ [kind]: select.value }, true);
+  emitPreferences();
   scheduleCloudSave();
 }
 
@@ -184,6 +213,7 @@ function start() {
   const observer = new MutationObserver(scheduleApply);
   observer.observe(document.body, { childList: true, subtree: true });
   applyAll();
+  emitPreferences();
   void loadCloudPreferences();
 }
 
