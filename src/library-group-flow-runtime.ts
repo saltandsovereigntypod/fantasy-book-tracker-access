@@ -53,6 +53,7 @@ function layoutGrid(grid: HTMLElement) {
 
   grid.classList.add('is-flow-grouped');
   grid.style.setProperty('position', 'relative', 'important');
+  const gridRect = grid.getBoundingClientRect();
 
   markers.forEach((marker) => {
     const firstArticle = articleByBookId(articles, marker.dataset.groupFirstBookId);
@@ -61,19 +62,25 @@ function layoutGrid(grid: HTMLElement) {
       return;
     }
 
-    const left = firstArticle.offsetLeft;
-    const top = Math.max(4, firstArticle.offsetTop - 40);
-    const width = firstArticle.offsetWidth;
+    const articleRect = firstArticle.getBoundingClientRect();
+    const left = Math.max(0, articleRect.left - gridRect.left + grid.scrollLeft);
+    const top = Math.max(2, articleRect.top - gridRect.top + grid.scrollTop - 34);
+    const width = articleRect.width;
     applyMarkerFlow(marker, left, top, width);
   });
 }
 
-let frame = 0;
+let firstFrame = 0;
+let secondFrame = 0;
 function scheduleLayout() {
-  if (frame) cancelAnimationFrame(frame);
-  frame = requestAnimationFrame(() => {
-    frame = 0;
-    document.querySelectorAll<HTMLElement>('.v2-view--library .v2-library-grid').forEach(layoutGrid);
+  if (firstFrame) cancelAnimationFrame(firstFrame);
+  if (secondFrame) cancelAnimationFrame(secondFrame);
+  firstFrame = requestAnimationFrame(() => {
+    firstFrame = 0;
+    secondFrame = requestAnimationFrame(() => {
+      secondFrame = 0;
+      document.querySelectorAll<HTMLElement>('.v2-view--library .v2-library-grid').forEach(layoutGrid);
+    });
   });
 }
 
@@ -98,6 +105,7 @@ function start() {
   window.addEventListener('resize', scheduleLayout, { passive: true });
   window.addEventListener('library-settings-visibility-changed', scheduleLayout as EventListener);
   window.addEventListener('library-groups-arranged', scheduleLayout as EventListener);
+  window.addEventListener('library-preferences-updated', scheduleLayout as EventListener);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
