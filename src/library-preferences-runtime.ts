@@ -9,6 +9,7 @@ type LibraryPreferences = {
   sortSecondary?: string;
   sortTertiary?: string;
   groupBy?: string;
+  settingsCollapsed?: boolean;
 };
 
 const LOCAL_KEY = 'empyrean-v2-library-preferences';
@@ -43,16 +44,52 @@ function selectKind(select: HTMLSelectElement): keyof LibraryPreferences | null 
 
 function applyPreference(select: HTMLSelectElement) {
   const kind = selectKind(select);
-  if (!kind) return;
+  if (!kind || kind === 'settingsCollapsed') return;
   let value = preferences[kind];
   if (kind === 'sortPrimary' && !value && preferences.detailedSort) value = preferences.detailedSort;
-  if (!value || select.value === value || ![...select.options].some((option) => option.value === value)) return;
+  if (typeof value !== 'string' || !value || select.value === value || ![...select.options].some((option) => option.value === value)) return;
   select.value = value;
   select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
+function setCollapsed(library: HTMLElement, collapsed: boolean) {
+  library.classList.toggle('library-settings-collapsed', collapsed);
+  const toggle = library.querySelector<HTMLButtonElement>('.library-settings-toggle');
+  if (!toggle) return;
+  toggle.setAttribute('aria-expanded', String(!collapsed));
+  toggle.setAttribute('aria-label', collapsed ? 'Expand library settings' : 'Collapse library settings');
+  const label = toggle.querySelector<HTMLElement>('.library-settings-toggle-label');
+  const state = toggle.querySelector<HTMLElement>('.library-settings-toggle-state');
+  if (label) label.textContent = 'Library settings';
+  if (state) state.textContent = collapsed ? 'Show' : 'Hide';
+}
+
+function ensureCollapseUi(library: HTMLElement) {
+  const controls = library.querySelector<HTMLElement>('.v2-library-controls');
+  if (!controls) return;
+
+  let toggle = library.querySelector<HTMLButtonElement>('.library-settings-toggle');
+  if (!toggle) {
+    toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'library-settings-toggle';
+    toggle.innerHTML = '<span class="library-settings-toggle-label">Library settings</span><span class="library-settings-toggle-state">Hide</span><span class="library-settings-toggle-chevron" aria-hidden="true">⌄</span>';
+    controls.insertAdjacentElement('beforebegin', toggle);
+    toggle.addEventListener('click', () => {
+      const collapsed = !library.classList.contains('library-settings-collapsed');
+      writeLocal({ settingsCollapsed: collapsed });
+      setCollapsed(library, collapsed);
+      scheduleCloudSave();
+      window.dispatchEvent(new CustomEvent('library-settings-visibility-changed', { detail: { collapsed } }));
+    });
+  }
+
+  setCollapsed(library, preferences.settingsCollapsed === true);
+}
+
 function applyAll() {
   document.querySelectorAll<HTMLSelectElement>('.v2-view--library .v2-library-controls select, .v2-view--library .advanced-library-sort select').forEach(applyPreference);
+  document.querySelectorAll<HTMLElement>('.v2-view--library .v2-library').forEach(ensureCollapseUi);
 }
 
 async function loadCloudPreferences() {
@@ -118,7 +155,7 @@ function handleChange(event: Event) {
   const select = event.target instanceof HTMLSelectElement ? event.target : null;
   if (!select || !select.matches('.v2-view--library .v2-library-controls select, .v2-view--library .advanced-library-sort select')) return;
   const kind = selectKind(select);
-  if (!kind) return;
+  if (!kind || kind === 'settingsCollapsed') return;
   writeLocal({ [kind]: select.value });
   scheduleCloudSave();
 }
@@ -136,6 +173,7 @@ function start() {
   document.addEventListener('change', handleChange, true);
   const observer = new MutationObserver(scheduleApply);
   observer.observe(document.body, { childList: true, subtree: true });
+  applyAll();
   void loadCloudPreferences();
 }
 
