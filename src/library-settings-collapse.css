@@ -1,31 +1,44 @@
 /* Collapsible Campaigns / Library configuration.
-   This only controls visibility of configuration UI. Book ordering, filtering,
-   grouping state, commands, and rendered cards remain owned by their existing systems. */
-.v2-view--library .library-settings-toggle {
+   The settings toggle and selected-book commands share one persistent utility bar.
+   Collapsing only hides configuration UI. Book state, filtering, sorting, grouping,
+   commands, and rendered cards remain owned by their existing systems. */
+.v2-view--library .library-settings-command-bar {
   width: 100%;
+  min-height: 64px;
+  margin: 10px 0 14px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--v2-border, var(--border));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--v2-panel, var(--panel)) 78%, transparent);
+  color: var(--v2-text, var(--text));
+  backdrop-filter: blur(10px);
+}
+
+.v2-view--library .library-settings-toggle {
+  flex: 0 0 auto;
   min-height: 44px;
-  margin: 10px 0 8px;
-  padding: 0 14px;
+  margin: 0;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--v2-border, var(--border));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--v2-panel, var(--panel)) 78%, transparent);
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
   color: var(--v2-text, var(--text));
   cursor: pointer;
   font: inherit;
   text-align: left;
-  backdrop-filter: blur(10px);
 }
 
 .v2-view--library .library-settings-toggle:hover {
-  border-color: color-mix(in srgb, var(--v2-accent, var(--accent)) 56%, var(--v2-border, var(--border)));
   background: color-mix(in srgb, var(--v2-panel-raised, var(--panel-2)) 82%, transparent);
 }
 
 .v2-view--library .library-settings-toggle-label {
-  flex: 1;
   font-weight: 800;
 }
 
@@ -52,18 +65,56 @@
   transform: rotate(180deg);
 }
 
+.v2-view--library .library-settings-command-bar > .v2-library-actionbar {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 6px 0 14px;
+  border: 0 !important;
+  border-left: 1px solid color-mix(in srgb, var(--v2-border, var(--border)) 78%, transparent) !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 .v2-view--library .v2-library.library-settings-collapsed .v2-library-controls,
 .v2-view--library .v2-library.library-settings-collapsed .advanced-library-sort {
   display: none !important;
 }
 
-.v2-view--library .v2-library.library-settings-collapsed .library-settings-toggle {
-  margin-bottom: 14px;
+@media (max-width: 900px) {
+  .v2-view--library .library-settings-command-bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .v2-view--library .library-settings-toggle {
+    width: 100%;
+  }
+
+  .v2-view--library .library-settings-toggle-label {
+    flex: 1;
+  }
+
+  .v2-view--library .library-settings-command-bar > .v2-library-actionbar {
+    width: 100%;
+    padding: 8px 2px 0;
+    border-left: 0 !important;
+    border-top: 1px solid color-mix(in srgb, var(--v2-border, var(--border)) 78%, transparent) !important;
+  }
 }
 
 @media (max-width: 760px) {
+  .v2-view--library .library-settings-command-bar {
+    min-height: 0;
+    margin-top: 8px;
+    padding: 7px 9px;
+  }
+
   .v2-view--library .library-settings-toggle {
     min-height: 42px;
-    margin-top: 8px;
   }
 }
