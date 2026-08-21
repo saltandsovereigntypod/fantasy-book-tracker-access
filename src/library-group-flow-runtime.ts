@@ -6,9 +6,6 @@ function ensureStyle() {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-/* Baseline group-flow behavior. The final visual authority lives in
-   library-group-universal-authority.css so theme files cannot selectively
-   erase the shared Library treatment. */
 @media (min-width: 761px) {
   .v2-view--library .v2-library-grid.is-flow-grouped {
     position: relative !important;
@@ -18,15 +15,8 @@ function ensureStyle() {
   }
 
   .v2-view--library .v2-library-grid.is-flow-grouped > .library-group-marker {
-    position: absolute !important;
     z-index: 4;
-    grid-column: auto !important;
-    inline-size: var(--group-flow-width, auto) !important;
     min-height: 20px;
-    margin: 0 !important;
-    padding: 0 4px !important;
-    left: var(--group-flow-left, 0px);
-    top: var(--group-flow-top, 0px);
     box-sizing: border-box;
     pointer-events: auto;
   }
@@ -48,10 +38,36 @@ function ensureStyle() {
   document.head.appendChild(style);
 }
 
-function clearMarkerPosition(marker: HTMLElement) {
+function clearMarkerFlow(marker: HTMLElement) {
+  marker.style.removeProperty('position');
+  marker.style.removeProperty('grid-column');
+  marker.style.removeProperty('left');
+  marker.style.removeProperty('top');
+  marker.style.removeProperty('inline-size');
+  marker.style.removeProperty('width');
+  marker.style.removeProperty('margin');
+  marker.style.removeProperty('padding');
   marker.style.removeProperty('--group-flow-left');
   marker.style.removeProperty('--group-flow-top');
   marker.style.removeProperty('--group-flow-width');
+}
+
+function applyMarkerFlow(marker: HTMLElement, left: number, top: number, width: number) {
+  /* Group markers are DOM siblings of cards so drag ordering remains simple,
+     but they must never participate in CSS Grid placement on desktop. Keep
+     this structural rule inline and !important so theme/layout styles cannot
+     turn a heading back into a full-width grid row. */
+  marker.style.setProperty('position', 'absolute', 'important');
+  marker.style.setProperty('grid-column', 'auto', 'important');
+  marker.style.setProperty('left', `${left}px`, 'important');
+  marker.style.setProperty('top', `${top}px`, 'important');
+  marker.style.setProperty('inline-size', `${width}px`, 'important');
+  marker.style.setProperty('width', `${width}px`, 'important');
+  marker.style.setProperty('margin', '0', 'important');
+  marker.style.setProperty('padding', '0 4px', 'important');
+  marker.style.setProperty('--group-flow-left', `${left}px`);
+  marker.style.setProperty('--group-flow-top', `${top}px`);
+  marker.style.setProperty('--group-flow-width', `${width}px`);
 }
 
 function firstArticleAfter(marker: HTMLElement): HTMLElement | null {
@@ -97,16 +113,26 @@ function layoutGrid(grid: HTMLElement) {
 
   if (!desktop) {
     grid.classList.remove('is-flow-grouped');
-    markers.forEach(clearMarkerPosition);
+    markers.forEach(clearMarkerFlow);
     return;
   }
 
   grid.classList.add('is-flow-grouped');
+  grid.style.setProperty('position', 'relative', 'important');
+
+  /* First remove every heading from grid flow. This is intentionally done
+     before reading article offsets: otherwise a marker can create the very
+     empty row whose coordinates we are trying to eliminate. */
+  markers.forEach((marker) => {
+    marker.style.setProperty('position', 'absolute', 'important');
+    marker.style.setProperty('grid-column', 'auto', 'important');
+    marker.style.setProperty('margin', '0', 'important');
+  });
 
   markers.forEach((marker, index) => {
     const firstArticle = firstArticleAfter(marker);
     if (!firstArticle) {
-      clearMarkerPosition(marker);
+      clearMarkerFlow(marker);
       return;
     }
 
@@ -116,10 +142,7 @@ function layoutGrid(grid: HTMLElement) {
     const left = firstArticle.offsetLeft;
     const top = Math.max(2, firstArticle.offsetTop - 24);
     const width = firstArticle.offsetWidth;
-
-    marker.style.setProperty('--group-flow-left', `${left}px`);
-    marker.style.setProperty('--group-flow-top', `${top}px`);
-    marker.style.setProperty('--group-flow-width', `${width}px`);
+    applyMarkerFlow(marker, left, top, width);
   });
 }
 
