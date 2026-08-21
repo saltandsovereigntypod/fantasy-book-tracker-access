@@ -13,17 +13,25 @@ type ExtendedArchive = V2ArchiveState & {
   libraryManualGroupOrder?: Partial<Record<GroupCriterion,string[]>>;
 };
 type SortCriterion = 'none'|'manual'|'updated-new'|'updated-old'|'created-new'|'created-old'|'title-az'|'title-za'|'author-az'|'author-za'|'series-az'|'series-za'|'series-number'|'rating-high'|'rating-low'|'spice-high'|'impact-high'|'progress-high'|'progress-low'|'status'|'favorite-first';
-
+type LibraryPreferenceSnapshot = { sortPrimary?: string; sortSecondary?: string; sortTertiary?: string; groupBy?: string };
 type MappedBook = { article: HTMLElement; book: V2BookRecord };
 
 const DESKTOP_QUERY = '(min-width: 761px)';
+const PREFERENCE_KEY = 'empyrean-v2-library-preferences';
 const SORT_OPTIONS: Array<[SortCriterion,string]> = [
   ['none','None'],['manual','Manual order'],['series-az','Series A to Z'],['series-za','Series Z to A'],['series-number','Number in series'],['title-az','Title A to Z'],['title-za','Title Z to A'],['author-az','Author A to Z'],['author-za','Author Z to A'],['updated-new','Recently updated'],['updated-old','Least recently updated'],['created-new','Newest added'],['created-old','Oldest added'],['rating-high','Rating high to low'],['rating-low','Rating low to high'],['progress-high','Progress high to low'],['progress-low','Progress low to high'],['spice-high','Spice high to low'],['impact-high','Emotional impact high to low'],['status','Reading status'],['favorite-first','Favorites first'],
 ];
 const GROUP_OPTIONS: Array<[GroupCriterion,string]> = [
   ['none','No grouping'],['series','Series'],['author','Author'],['status','Reading status'],['rating','Rating'],['progress','Progress band'],['favorite','Favorite status'],['genre','Primary genre'],
 ];
+const SORT_IDS = new Set(SORT_OPTIONS.map(([id])=>id));
+const GROUP_IDS = new Set(GROUP_OPTIONS.map(([id])=>id));
 
+function initialPreferences():LibraryPreferenceSnapshot{
+  try{const value=JSON.parse(localStorage.getItem(PREFERENCE_KEY)||'{}');return value&&typeof value==='object'?value as LibraryPreferenceSnapshot:{};}catch{return {};}
+}
+function validSort(value:unknown,fallback:SortCriterion):SortCriterion{return typeof value==='string'&&SORT_IDS.has(value as SortCriterion)?value as SortCriterion:fallback;}
+function validGroup(value:unknown,fallback:GroupCriterion):GroupCriterion{return typeof value==='string'&&GROUP_IDS.has(value as GroupCriterion)?value as GroupCriterion:fallback;}
 function seriesNumber(value:string|undefined):number { const parsed=Number(value); return Number.isFinite(parsed)?parsed:Number.MAX_SAFE_INTEGER; }
 function text(value:unknown):string { return String(value||'').trim(); }
 function orderedIndex(order:string[],id:string):number { const index=order.indexOf(id); return index<0?Number.MAX_SAFE_INTEGER:index; }
@@ -103,15 +111,19 @@ function createGroupMarker(label:string,index:number,entries:MappedBook[]):HTMLE
   marker.dataset.groupIndex=String(index);
   marker.dataset.groupFirstBookId=entries[0]?.book.id||'';
   marker.draggable=true;
-  marker.title='Drag to reorder groups';
-  marker.innerHTML=`<span>${label}</span><em>Drag group</em>`;
+  marker.title='Drag to reorder group';
+  const labelNode=document.createElement('span');
+  labelNode.textContent=label;
+  marker.appendChild(labelNode);
   return marker;
 }
 
 function LibraryMetadataTools(){
+  const saved=useMemo(()=>initialPreferences(),[]);
   const[archive,setArchive]=useState<ExtendedArchive|null>(null); const[editorTarget,setEditorTarget]=useState<Element|null>(null); const[libraryTarget,setLibraryTarget]=useState<Element|null>(null); const[currentBookId,setCurrentBookId]=useState(''); const[position,setPosition]=useState(''); const[saveState,setSaveState]=useState('');
-  const[primary,setPrimary]=useState<SortCriterion>('updated-new'); const[secondary,setSecondary]=useState<SortCriterion>('none'); const[tertiary,setTertiary]=useState<SortCriterion>('none'); const[group,setGroup]=useState<GroupCriterion>('none');
+  const[primary,setPrimary]=useState<SortCriterion>(()=>validSort(saved.sortPrimary,'updated-new')); const[secondary,setSecondary]=useState<SortCriterion>(()=>validSort(saved.sortSecondary,'none')); const[tertiary,setTertiary]=useState<SortCriterion>(()=>validSort(saved.sortTertiary,'none')); const[group,setGroup]=useState<GroupCriterion>(()=>validGroup(saved.groupBy,'none'));
   useEffect(()=>{let active=true;const syncTargets=()=>{setEditorTarget(document.querySelector('.v2-view--editor .book-panel .field-stack'));setLibraryTarget(document.querySelector('.v2-view--library .v2-library-controls'));};syncTargets();const observer=new MutationObserver(syncTargets);observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});getAuthSnapshot().then(async({user})=>{if(!user||!active)return;const next=await loadCloudArchive(user) as ExtendedArchive;if(active)setArchive(next);}).catch(()=>undefined);return()=>{active=false;observer.disconnect();};},[]);
+  useEffect(()=>{const sync=(event:Event)=>{const detail=(event as CustomEvent<LibraryPreferenceSnapshot>).detail||{};setPrimary(value=>validSort(detail.sortPrimary,value));setSecondary(value=>validSort(detail.sortSecondary,value));setTertiary(value=>validSort(detail.sortTertiary,value));setGroup(value=>validGroup(detail.groupBy,value));};window.addEventListener('library-preferences-updated',sync as EventListener);return()=>window.removeEventListener('library-preferences-updated',sync as EventListener);},[]);
   useEffect(()=>{if(!editorTarget||!archive)return;loadWorkspaceDraft().then(draft=>{const id=draft?.book?.id||'';setCurrentBookId(id);setPosition(id?(archive.bookSeriesPositions?.[id]||''):'');}).catch(()=>undefined);},[editorTarget,archive]);
   const booksByTitle=useMemo(()=>{const map=new Map<string,V2BookRecord[]>();for(const book of archive?.books||[]){const key=book.title.trim().toLowerCase();map.set(key,[...(map.get(key)||[]),book]);}return map;},[archive?.books]);
 
