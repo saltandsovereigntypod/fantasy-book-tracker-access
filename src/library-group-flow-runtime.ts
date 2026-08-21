@@ -6,30 +6,9 @@ function ensureStyle() {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-.v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 58%, var(--v2-accent, var(--accent)) 42%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 76%, var(--v2-accent, var(--accent)) 24%)
-  ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 38%, var(--v2-accent, var(--accent)) 62%) !important;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--v2-accent, var(--accent)) 22%, transparent),
-    inset 0 10px 26px color-mix(in srgb, var(--v2-accent, var(--accent)) 10%, transparent);
-}
-
-.v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-b {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 64%, var(--path-paper, var(--paper)) 36%),
-    color-mix(in srgb, var(--v2-panel, var(--panel)) 82%, var(--path-paper, var(--paper)) 18%)
-  ) !important;
-  border-color: color-mix(in srgb, var(--v2-border, var(--border)) 44%, var(--path-paper, var(--paper)) 56%) !important;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--path-paper, var(--paper)) 18%, transparent),
-    inset 0 10px 26px color-mix(in srgb, var(--path-paper, var(--paper)) 8%, transparent);
-}
-
+/* Baseline group-flow behavior. The final visual authority lives in
+   library-group-universal-authority.css so theme files cannot selectively
+   erase the shared Library treatment. */
 @media (min-width: 761px) {
   .v2-view--library .v2-library-grid.is-flow-grouped {
     position: relative !important;
@@ -63,20 +42,6 @@ function ensureStyle() {
 
   .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group) {
     position: relative;
-  }
-
-  .v2-view--library .v2-library-grid.is-flow-grouped > article.is-flow-group-start:not(.is-flow-first-group)::before {
-    content: '';
-    position: absolute;
-    z-index: 2;
-    pointer-events: none;
-    inset-block: 5%;
-    inset-inline-start: -13px;
-    inline-size: 2px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 52%, transparent);
-    box-shadow: 0 0 7px color-mix(in srgb, var(--v2-border-strong, var(--v2-border, var(--border))) 18%, transparent);
-    opacity: .94;
   }
 }
 `;
@@ -167,16 +132,36 @@ function scheduleLayout() {
   });
 }
 
+let resizeObserver: ResizeObserver | null = null;
+function observeGrids() {
+  if (!('ResizeObserver' in window)) return;
+  if (!resizeObserver) resizeObserver = new ResizeObserver(scheduleLayout);
+  document.querySelectorAll<HTMLElement>('.v2-view--library .v2-library-grid').forEach((grid) => resizeObserver?.observe(grid));
+}
+
 function start() {
   ensureStyle();
   scheduleLayout();
+  observeGrids();
 
   const observer = new MutationObserver((mutations) => {
-    if (mutations.some((mutation) => mutation.type === 'childList')) scheduleLayout();
+    const relevant = mutations.some((mutation) =>
+      mutation.type === 'childList' ||
+      (mutation.type === 'attributes' && ['class', 'data-universe', 'data-path', 'data-court'].includes(mutation.attributeName || '')),
+    );
+    if (!relevant) return;
+    observeGrids();
+    scheduleLayout();
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'data-universe', 'data-path', 'data-court'],
+  });
 
   window.addEventListener('resize', scheduleLayout, { passive: true });
+  window.addEventListener('library-settings-visibility-changed', scheduleLayout as EventListener);
   document.addEventListener('change', (event) => {
     const target = event.target;
     if (target instanceof HTMLSelectElement && target.closest('.v2-view--library')) scheduleLayout();
