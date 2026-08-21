@@ -26,6 +26,8 @@
     inset 0 10px 26px color-mix(in srgb, var(--v2-muted, var(--muted, #98938c)) 4%, transparent) !important;
 }
 
+/* Custom Library backing settings remain authoritative. Group tones are mixed
+   from the user's chosen backing instead of replacing that choice. */
 html[data-library-backing-custom='true'] .core-path-app .v2-view--library .v2-library-grid.is-grouped-tinted > article.is-flow-group-tone-a {
   background: color-mix(
     in srgb,
@@ -50,6 +52,8 @@ html[data-library-backing-visible='false'] .core-path-app .v2-view--library .v2-
 }
 
 @media (min-width: 761px) {
+  /* Markers float over the continuous card grid instead of consuming an entire
+     grid row. A new group can begin in the next available column. */
   .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped {
     position: relative !important;
     box-sizing: border-box !important;
