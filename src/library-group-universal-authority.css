@@ -64,6 +64,9 @@ html[data-library-backing-visible='false'] .core-path-app .v2-view--library .v2-
     grid-row: auto !important;
   }
 
+  /* The old free-floating markers stay in the DOM for legacy group-order logic,
+     but they no longer render. Visible headings are anchored to the first card
+     in each group by library-group-stability-runtime. */
   .core-path-app .v2-view--library .v2-library-grid.is-flow-grouped > .library-group-marker {
     display: none !important;
   }
