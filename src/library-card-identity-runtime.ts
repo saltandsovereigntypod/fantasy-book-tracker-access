@@ -31,7 +31,10 @@ function stampGrid(grid: HTMLElement) {
   const used = new Set<string>();
   grid.querySelectorAll<HTMLElement>(':scope > article').forEach((article) => {
     const title = visibleTitle(article);
-    if (!title) return;
+    if (!title) {
+      delete article.dataset.bookId;
+      return;
+    }
     const candidates = byTitle.get(title.toLocaleLowerCase()) || [];
     const current = article.dataset.bookId;
     const currentMatch = current ? candidates.find((book) => book.id === current && !used.has(book.id)) : undefined;
@@ -58,22 +61,28 @@ function scheduleStamp() {
   });
 }
 
+function mutationTouchesLibrary(mutation: MutationRecord): boolean {
+  const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+  if (target?.closest('.v2-view--library .v2-library-grid')) return true;
+  return [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
+    node instanceof HTMLElement && (node.matches('article,.v2-library-grid') || Boolean(node.querySelector?.('article,.v2-library-grid')))
+  );
+}
+
 function start() {
   stampAll();
   document.addEventListener('change', (event) => {
     const select = event.target instanceof HTMLSelectElement ? event.target : null;
     if (!select?.matches('.v2-view--library .advanced-library-sort select')) return;
     stampAll();
+    requestAnimationFrame(scheduleStamp);
   }, true);
-  window.addEventListener('library-preferences-updated', stampAll as EventListener);
+  window.addEventListener('library-preferences-updated', scheduleStamp as EventListener);
 
   const observer = new MutationObserver((mutations) => {
-    const libraryCardsChanged = mutations.some((mutation) => [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
-      node instanceof HTMLElement && (node.matches('article,.v2-library-grid') || Boolean(node.querySelector?.('article,.v2-library-grid')))
-    ));
-    if (libraryCardsChanged) scheduleStamp();
+    if (mutations.some(mutationTouchesLibrary)) scheduleStamp();
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
